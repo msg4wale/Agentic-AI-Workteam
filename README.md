@@ -22,6 +22,26 @@ serial.**
   surfaces reusable patterns/utilities/libraries, and flags steps that duplicate existing functionality.
 - **Parallel, unbiased Review and QA** — the Code Reviewer and QA Engineer run each perspective as an
   independent parallel subagent, then consolidate, so findings are unbiased.
+- **Checkpoint approvals** — the Coordinator stops after **every** stage, shows you the deliverable, and
+  asks you to **Approve / Request changes / Pause** before proceeding. Nothing advances without you.
+- **Durable state & decision memory** — the Coordinator maintains `.workteam/Workteam-State.md` (stage,
+  gate, and task status) and `.workteam/Decisions-Log.md` (every on-the-fly clarification). After any
+  disruption it **resumes exactly where it stopped** — never re-running an approved stage, overwriting
+  an approved deliverable, or duplicating a completed task.
+
+## How progression works
+
+You invoke the **Coordinator once**; it dispatches every downstream agent itself — you never hand-call
+the next agent. Between stages it does **not** auto-advance: it presents the finished deliverable and
+prompts you via `#vscode/askQuestions`:
+
+- **Approve** → the stage is marked `approved` in the state ledger and the next stage is dispatched.
+- **Request changes** → your feedback is logged and the **same** worker revises the deliverable in place.
+- **Pause** → work stops with the stage left `awaiting-approval`; a later session resumes cleanly.
+
+A stage is "done" when its agent's own gate/Definition-of-Done verdict is met **and** you approve it at
+the checkpoint. Because state lives in `.workteam/` (not in chat memory), you can close the session and
+resume later: the Coordinator reads the ledger first and continues from the first unapproved stage.
 
 ## Workteam Overview
 
@@ -60,22 +80,26 @@ Each agent is granted only the tools its responsibility requires.
 
 ## End-to-End Development Workflow
 
+`[CHK]` = requester review-and-approve checkpoint (Approve / Request changes / Pause). Every stage ends
+with one, and every transition is written to `.workteam/` durable state.
+
 ```text
 Requester
     |
     v
-Coordinator  (clarifies goal via #vscode/askQuestions; dispatches each worker as an isolated subagent)
+Coordinator  (reads .workteam/ state first & resumes; clarifies goal via #vscode/askQuestions;
+              dispatches each worker as an isolated subagent; owns the state ledger + decision log)
     |
     v
-1. Idea Discovery ........ idea.md
+1. Idea Discovery ........ idea.md ................... [CHK]
     v
-2. Product Manager ....... PRD.md
+2. Product Manager ....... PRD.md .................... [CHK]
     v
-3. Solution Architect .... TDD.md
+3. Solution Architect .... TDD.md .................... [CHK]
     v
-4. Engineering Lead ...... Engineering-Plan.md
+4. Engineering Lead ...... Engineering-Plan.md ....... [CHK]
     v
-5. Plan Architect ........ Plan-Validation-Report.md      [HARD GATE]
+5. Plan Architect ........ Plan-Validation-Report.md  [HARD GATE] [CHK]
     |                          |
     |                          +-- REVISE --> back to Engineering Lead (reuse / duplication findings)
     |                          |
@@ -85,7 +109,7 @@ Coordinator  (clarifies goal via #vscode/askQuestions; dispatches each worker as
     |                                                                                     |
     v                                                                                     v
 6. Software Engineer                                                          6. Software Engineer
-   (one approved task per subagent)                                              (another safe task)
+   (one approved task per subagent) [CHK]                                        (another safe task) [CHK]
     |                                                                                     |
     +---------------------------------------+---------------------------------------------+
                                             |
@@ -93,7 +117,7 @@ Coordinator  (clarifies goal via #vscode/askQuestions; dispatches each worker as
                                      Integrated Change
                                             |
                                             v
-7. Code Reviewer  (5 perspectives run as parallel, blind subagents -> consolidate -> verdict)
+7. Code Reviewer  (5 perspectives run as parallel, blind subagents -> consolidate -> verdict) [CHK]
                                             |
                           +-----------------+-----------------+
                           |                                   |
@@ -101,14 +125,18 @@ Coordinator  (clarifies goal via #vscode/askQuestions; dispatches each worker as
                           |                                   |
                           v                                   v
                   Software Engineer               8. QA Engineer  (4 perspectives run as
-                          ^                            parallel, blind subagents -> consolidate)
+                          ^                            parallel, blind subagents -> consolidate) [CHK]
                           |                                   |
                           |                        +----------+----------+
                           |                        |                     |
                           +--- QA FAIL          QA FAIL               QA PASS
                                                                         |
                                                                         v
-                                                            Release / Merge Gate
+                                                            Release / Merge Gate [CHK]
+
+Every stage transition updates .workteam/Workteam-State.md (stage/gate/task status) and
+.workteam/Decisions-Log.md (clarifications). On restart the Coordinator reads these and resumes at the
+first unapproved stage — no re-running, overwriting, or duplicating completed work.
 ```
 
 The **Coordinator** owns cross-stage orchestration and gate enforcement. The **Engineering Lead** owns
@@ -124,14 +152,25 @@ governing rule is:
 ## 0. Coordinator Agent
 
 **Purpose:** Own the overall task and orchestrate the workteam. Interview the requester, dispatch each
-stage to the right worker as an isolated subagent, enforce lifecycle gates, and route rework loops until
-the task is releasable.
+stage to the right worker as an isolated subagent, stop at every stage for the requester to review and
+approve the deliverable, maintain durable state, and route rework loops until the task is releasable.
 
 **Agent:** `.github/agents/coordinator.agent.md`
 
 The Coordinator does not produce any stage deliverable itself. It dispatches every worker via
 `runSubagent` (isolated context, concise result returned), enforces the Plan Architect gate before
 implementation, and routes Review `CHANGES REQUIRED` and QA `FAIL` loops back to the Software Engineer.
+It presents each deliverable at a **checkpoint** and advances only on the requester's approval, and it
+maintains the workteam's **durable memory** so an interrupted run resumes cleanly.
+
+### Skill
+
+| Skill | Responsibility |
+|---|---|
+| `workteam-state-management` | Maintains `.workteam/Workteam-State.md` and `.workteam/Decisions-Log.md`; defines the checkpoint-approval, update-at-every-transition, and resume/idempotency protocols. |
+
+The Coordinator's only writes are to `.workteam/*` (state ledger + decision log) — never to a stage
+deliverable.
 
 ---
 
@@ -378,12 +417,20 @@ Agentic-AI-Workteam/
 │   │   └── qa-engineer.agent.md
 │   └── skills/
 │       └── <reusable skill folders>/SKILL.md
+├── .workteam/                     # created at run time in the TARGET project (not shipped here)
+│   ├── Workteam-State.md          #   durable state ledger (stage/gate/task status)
+│   └── Decisions-Log.md           #   append-only on-the-fly decisions & clarifications
 ├── MANIFEST.md
 └── README.md
 ```
 
 `.github/` is the **single source of truth** and the installable workteam. Custom agents live under
 `.github/agents/`; reusable Agent Skills live under `.github/skills/<skill-name>/SKILL.md`.
+
+`.workteam/` is the Coordinator's **durable memory**, created at run time in the project the workteam is
+operating on. It is committed by default so a project can version its workteam progress; delete it to
+start a task fresh. It holds no product deliverable — those (`idea.md`, `PRD.md`, …) live at the project
+root as before.
 
 ---
 
@@ -421,19 +468,26 @@ directly for a single stage.
 
 # Recommended Operating Sequence
 
-1. Invoke the **Coordinator** with your goal; it clarifies scope and entry point via
-   `#vscode/askQuestions`.
+1. Invoke the **Coordinator** with your goal. It first reads any existing `.workteam/` state (resuming
+   if a task is in progress), then clarifies scope and entry point via `#vscode/askQuestions`.
 2. The Coordinator dispatches **Idea Discovery**, then **Product Manager**, then **Solution Architect**,
    then **Engineering Lead** — each as an isolated subagent, each gated on the prior deliverable.
+   **After each stage it stops and asks you to review the deliverable and Approve / Request changes /
+   Pause.** It advances only on your approval; "Request changes" re-runs the same worker in place.
 3. **Plan Architect** validates the engineering plan against the codebase. On **REVISE**, the plan
-   returns to the Engineering Lead; only **APPROVE** releases implementation.
+   returns to the Engineering Lead; only **APPROVE** (plus your checkpoint approval) releases
+   implementation.
 4. The Coordinator dispatches one approved task per **Software Engineer** subagent, running
-   parallel-safe tasks concurrently.
+   parallel-safe tasks concurrently, and updates the task board in the state ledger.
 5. **Code Reviewer** runs its five perspectives in parallel and returns a verdict; `CHANGES REQUIRED`
    loops back to Software Engineering.
 6. **QA Engineer** runs its four perspectives in parallel and returns a verdict; `FAIL` loops back to
    Software Engineering (re-review if code changes).
-7. Release/merge only when review and QA gates pass.
+7. Release/merge only when review and QA gates pass **and** you approve at the checkpoint.
+
+**Resuming after a disruption:** just invoke the Coordinator again. It reads `.workteam/Workteam-State.md`
+and `.workteam/Decisions-Log.md`, continues from the first unapproved stage, and never re-runs an
+approved stage, overwrites an approved deliverable, or re-dispatches a completed task.
 
 ---
 
@@ -450,6 +504,10 @@ directly for a single stage.
 - **Independent, unbiased evaluation.** Review and QA perspectives run in parallel, blind to one
   another, before consolidation.
 - **No silent assumptions.** Ambiguity is routed via `#vscode/askQuestions` or upstream, never guessed.
+- **Human-approved progression.** The Coordinator advances only on the requester's checkpoint approval,
+  never on a technically-met gate alone.
+- **Durable, resumable state.** Stage/task status and every decision live in `.workteam/`, so a disrupted
+  run resumes exactly where it stopped — idempotent, no re-running or duplication.
 - **Source-of-truth hierarchy.** Downstream agents do not rewrite upstream intent.
 - **Parallelize independent work; serialize dependent decisions.**
 - **Evidence over claims.** Tests, review findings, and QA verdicts trace to actual evidence.
@@ -460,7 +518,8 @@ directly for a single stage.
 
 This repository contains the Coordinator-orchestrated redesign:
 
-- Coordinator agent with isolated subagent delegation and gate enforcement
+- Coordinator agent with isolated subagent delegation, per-stage checkpoint approvals, and a durable
+  state ledger + decision log (`.workteam/`) for resumable, idempotent runs
 - Idea Discovery, Product Manager, Solution Architect, Engineering Lead (as before, now
   `#vscode/askQuestions`-enabled and Coordinator-dispatchable)
 - Plan Architect with codebase reuse analysis and duplication detection

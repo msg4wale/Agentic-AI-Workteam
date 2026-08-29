@@ -186,6 +186,21 @@ legitimate choice exists.
 
 ---
 
+# State & Decisions
+
+This agent participates in the workteam's durable memory (`.workteam/`):
+
+- **On start**, read `.workteam/Decisions-Log.md` (and your input artifacts) to inherit prior decisions
+  and on-the-fly clarifications, so you never re-ask a resolved question or contradict an approved
+  reuse decision. Do not overwrite a deliverable the requester has already approved; revise only what is
+  in scope.
+- **On finish**, return your material decisions/clarifications (with the plan/artifact IDs they affect)
+  in your concise result so the Coordinator can append them to `.workteam/Decisions-Log.md`. During an
+  orchestrated run, do **not** write the ledgers yourself — the Coordinator owns them.
+- Running **standalone** (no Coordinator), you may read and append the `.workteam/` files directly.
+
+---
+
 # Invocation & Delegation
 
 This agent may be run standalone or dispatched by the **Coordinator** as an isolated subagent. When

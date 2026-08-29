@@ -27,6 +27,24 @@ any stage deliverable.
   Never write a stage deliverable (`idea.md`, `PRD.md`, `TDD.md`, `Engineering-Plan.md`,
   `Plan-Validation-Report.md`, source, `QA-Report.md`) through this skill.
 
+## Worker Participation (the "State & Decisions" contract)
+
+Every worker agent — Idea Discovery, Product Manager, Solution Architect, Engineering Lead, Plan
+Architect, Software Engineer, Code Reviewer, QA Engineer — participates in durable memory as follows.
+Each worker states a short pointer to this contract rather than repeating it:
+
+- **On start**, read `.workteam/Decisions-Log.md` (and your input artifact/task) to inherit prior
+  decisions and on-the-fly clarifications, so you never re-ask a resolved question or contradict an
+  approved decision. Do not overwrite a deliverable the requester has already approved, and do not
+  re-implement a task the state ledger marks `done`; work only what is in scope.
+- **On finish**, return your material decisions/clarifications (with the requirement/artifact/task IDs
+  they affect) in your concise result so the Coordinator can append them to `.workteam/Decisions-Log.md`
+  and update the state ledger / task board. During an orchestrated run, do **not** write the ledgers
+  yourself — the Coordinator is the sole writer (this keeps parallel subagents free of write conflicts).
+- Running **standalone** (no Coordinator), you may read and append the `.workteam/` files directly.
+- Read-only reviewers (Code Reviewer, QA Engineer) treat the decision log as read context only and never
+  edit production code; QA's writes remain limited to its own QA artifacts.
+
 ## Stage & Status Model
 
 Stages (in order): `idea-discovery`, `product-manager`, `solution-architect`, `engineering-lead`,

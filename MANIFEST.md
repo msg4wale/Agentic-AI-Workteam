@@ -1,7 +1,7 @@
 # Agentic AI Workteam Manifest
 
 - Agents: 9
-- Skills: 51
+- Skills: 52
 
 ## Agents
 - `.github/agents/coordinator.agent.md`
@@ -27,6 +27,7 @@
 - `.github/skills/engineering-plan-validation/SKILL.md`
 - `.github/skills/engineering-readiness-analysis/SKILL.md`
 - `.github/skills/epic-user-story-design/SKILL.md`
+- `.github/skills/existing-system-discovery/SKILL.md`
 - `.github/skills/focused-implementation/SKILL.md`
 - `.github/skills/functional-acceptance-validation/SKILL.md`
 - `.github/skills/idea-validation/SKILL.md`

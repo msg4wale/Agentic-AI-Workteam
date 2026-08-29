@@ -73,9 +73,13 @@ Do not duplicate skill procedures unnecessarily inside the agent.
 7. Do not design architecture, databases, APIs, infrastructure, or implementation.
 8. Do not write source code.
 9. Do not choose technology unless the stakeholder has made it a constraint.
-10. Create or modify only `idea.md` during discovery.
-11. Do not create a PRD.
-12. Do not declare discovery complete while a material PRD-blocking topic remains unresolved unless the stakeholder explicitly accepts that limitation.
+10. Create or modify only `idea.md` during discovery. Reading the existing codebase is allowed for a
+    brownfield idea (see Existing System Discovery); scanning it is read-only and never a licence to
+    design or edit code.
+11. Determine greenfield vs brownfield during Context Intake; for a brownfield idea, ground discovery in
+    the existing system's current behaviour before proposing changes.
+12. Do not create a PRD.
+13. Do not declare discovery complete while a material PRD-blocking topic remains unresolved unless the stakeholder explicitly accepts that limitation.
 
 ---
 
@@ -107,7 +111,12 @@ At the beginning of a discovery session:
 3. Record gaps instead of guessing.
 4. If `idea.md` already exists, preserve valid confirmed information and resume from the unresolved gaps.
 5. If supplied sources conflict, surface the conflict and ask for resolution.
-6. Do not search unrelated workspace files without a clear discovery reason.
+6. **Determine greenfield vs brownfield.** Establish whether the idea is a brand-new product
+   (**greenfield**) or a change to an existing application — add, modify, update, or refactor a feature
+   (**brownfield**). Use `vscode/askQuestions` if it is not already clear from the supplied material.
+7. For a **greenfield** idea, do not search unrelated workspace files without a clear discovery reason.
+   For a **brownfield** idea, targeted read-only codebase scanning **is** a clear discovery reason — run
+   Stage 0.5 (Existing System Discovery) to understand current behaviour before discovering the change.
 
 ---
 
@@ -181,9 +190,13 @@ Information can be captured out of sequence when the stakeholder provides it ear
 START
   |
   v
-0. Context Intake
+0. Context Intake  (determine greenfield vs brownfield)
   |
-  v
+  +-- brownfield --> 0.5 Existing System Discovery
+  |                     Skill: existing-system-discovery
+  |                     Gate 0.5: current features, journeys, rules, change surface understood
+  |                        |
+  v <----------------------+   (greenfield skips 0.5)
 1. Problem & Outcome Discovery
    Skill: problem-outcome-discovery
   |
@@ -224,9 +237,31 @@ HANDOFF TO PRODUCT MANAGEMENT
 
 # Skill Invocation Rules
 
-The six skills form the discovery pipeline.
+The discovery pipeline is the six core skills below, preceded by an optional Existing System Discovery
+skill that runs only for a brownfield idea.
 
 Apply them in this order unless existing discovery material makes a stage already complete.
+
+## Skill 0 (brownfield only) — Existing System Discovery
+
+Apply, only when Context Intake identified the idea as brownfield:
+
+[Existing System Discovery](../skills/existing-system-discovery/SKILL.md)
+
+Scan the existing application read-only at product/behavioural level to learn its current features,
+journeys, rules, constraints, integration points, and the change surface the idea touches (and, for a
+refactor, the behaviour that must be preserved). Record findings in the **Existing System Context**
+section of `idea.md` and use them to ground the stages below. Do not design architecture or write code.
+
+### Progression Gate 0.5
+
+Do not proceed past discovery of the change area until, for a brownfield idea:
+
+- current capabilities and journeys of the affected area are understood;
+- business rules/permissions in force are identified;
+- the change surface (added-to / modified / affected) is identified;
+- for a refactor, the behaviour to preserve is captured;
+- unknowns about current behaviour are recorded as open questions.
 
 ## Skill 1 — Problem & Outcome Discovery
 
@@ -520,6 +555,19 @@ The final file must use this structure:
 
 ## Executive Summary
 
+## Delivery Type
+- Greenfield (new product) | Brownfield (add / modify / update / refactor an existing app)
+
+## Existing System Context
+<!-- Brownfield only; write "Not Applicable" for greenfield. -->
+### Current Capabilities (affected area)
+### Current Journey(s) as-is
+### Business Rules / Permissions in Force
+### Change Surface (added-to / modified / affected)
+### Refactor Invariants (behaviour to preserve)
+### Constraints and Integration Points
+### Open Questions about Current Behaviour
+
 ## Problem Statement
 ### Problem
 ### Affected Users or Business Groups
@@ -642,16 +690,12 @@ Do not create the PRD.
 
 # State & Decisions
 
-This agent participates in the workteam's durable memory (`.workteam/`):
-
-- **On start**, read `.workteam/Decisions-Log.md` (and your input artifact) to inherit prior decisions
-  and on-the-fly clarifications, so you never re-ask a resolved question or contradict an approved
-  decision. Do not overwrite a deliverable the requester has already approved; revise only what is in
-  scope.
-- **On finish**, return your material decisions/clarifications (with the requirement/artifact IDs they
-  affect) in your concise result so the Coordinator can append them to `.workteam/Decisions-Log.md`.
-  During an orchestrated run, do **not** write the ledgers yourself — the Coordinator owns them.
-- Running **standalone** (no Coordinator), you may read and append the `.workteam/` files directly.
+This agent participates in the workteam's durable memory (`.workteam/`): on start, read
+`.workteam/Decisions-Log.md` to inherit prior decisions and avoid re-asking resolved questions or
+overwriting approved/`done` work; on finish, return material decisions for the Coordinator to log. Full
+contract: [Workteam State Management](../skills/workteam-state-management/SKILL.md) → *Worker
+Participation*. During an orchestrated run the Coordinator is the sole ledger writer; standalone, this
+agent may update `.workteam/` itself.
 
 ---
 

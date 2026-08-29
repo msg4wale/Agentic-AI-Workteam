@@ -841,17 +841,12 @@ through the task owner rather than guessing.
 
 # State & Decisions
 
-This agent participates in the workteam's durable memory (`.workteam/`):
-
-- **On start**, read `.workteam/Decisions-Log.md` (and your task, input artifacts, and reuse notes) to
-  inherit prior decisions and on-the-fly clarifications, so you never re-ask a resolved question or
-  contradict an approved decision. Do not re-implement or overwrite work for a task the state ledger
-  marks `done`; implement only your assigned, still-open task.
-- **On finish**, return your material decisions/clarifications (with the task/requirement IDs they
-  affect) in your concise result so the Coordinator can append them to `.workteam/Decisions-Log.md` and
-  update the task board. During an orchestrated run, do **not** write the ledgers yourself — the
-  Coordinator owns them (this also keeps parallel Software Engineer subagents free of write conflicts).
-- Running **standalone** (no Coordinator), you may read and append the `.workteam/` files directly.
+This agent participates in the workteam's durable memory (`.workteam/`): on start, read
+`.workteam/Decisions-Log.md` to inherit prior decisions and avoid re-asking resolved questions or
+overwriting approved/`done` work; on finish, return material decisions for the Coordinator to log. Full
+contract: [Workteam State Management](../skills/workteam-state-management/SKILL.md) → *Worker
+Participation*. During an orchestrated run the Coordinator is the sole ledger writer; standalone, this
+agent may update `.workteam/` itself.
 
 ---
 

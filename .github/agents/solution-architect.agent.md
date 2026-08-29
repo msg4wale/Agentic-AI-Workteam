@@ -1177,16 +1177,12 @@ examples, not mandates, and record the stakeholder's decision. Do not silently c
 
 # State & Decisions
 
-This agent participates in the workteam's durable memory (`.workteam/`):
-
-- **On start**, read `.workteam/Decisions-Log.md` (and your input artifact) to inherit prior decisions
-  and on-the-fly clarifications, so you never re-ask a resolved question or contradict an approved
-  decision. Do not overwrite a deliverable the requester has already approved; revise only what is in
-  scope.
-- **On finish**, return your material decisions/clarifications (with the requirement/artifact IDs they
-  affect) in your concise result so the Coordinator can append them to `.workteam/Decisions-Log.md`.
-  During an orchestrated run, do **not** write the ledgers yourself — the Coordinator owns them.
-- Running **standalone** (no Coordinator), you may read and append the `.workteam/` files directly.
+This agent participates in the workteam's durable memory (`.workteam/`): on start, read
+`.workteam/Decisions-Log.md` to inherit prior decisions and avoid re-asking resolved questions or
+overwriting approved/`done` work; on finish, return material decisions for the Coordinator to log. Full
+contract: [Workteam State Management](../skills/workteam-state-management/SKILL.md) → *Worker
+Participation*. During an orchestrated run the Coordinator is the sole ledger writer; standalone, this
+agent may update `.workteam/` itself.
 
 ---
 

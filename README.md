@@ -177,9 +177,11 @@ deliverable.
 ## 1. Idea Discovery Agent
 
 **Purpose:** Interview, groom, challenge, and clarify the problem owner until the product idea is
-sufficiently defined for Product Management without hidden assumptions.
+sufficiently defined for Product Management without hidden assumptions. Handles both **greenfield** (new
+product) and **brownfield** ideas — adding, modifying, updating, or refactoring an existing app — and
+determines which up front.
 
-**Input:** Problem owner / innovator → **Output:** `idea.md`
+**Input:** Problem owner / innovator (+ existing codebase for brownfield) → **Output:** `idea.md`
 
 **Agent:** `.github/agents/idea-discovery.agent.md`
 
@@ -187,6 +189,7 @@ sufficiently defined for Product Management without hidden assumptions.
 
 | Skill | Responsibility |
 |---|---|
+| `existing-system-discovery` | **Brownfield only.** Read-only, product-level scan of the existing app — current features, journeys, rules, integration points, change surface, and (for a refactor) behaviour to preserve — feeding `idea.md`'s Existing System Context. |
 | `problem-outcome-discovery` | Clarifies the problem, desired outcome, evidence, value, and success definition. |
 | `stakeholder-user-discovery` | Identifies users, stakeholders, actors, needs, permissions, and affected parties. |
 | `journey-requirements-discovery` | Discovers journeys, functional requirements, business rules, states, and interactions. |
@@ -420,12 +423,16 @@ Agentic-AI-Workteam/
 ├── .workteam/                     # created at run time in the TARGET project (not shipped here)
 │   ├── Workteam-State.md          #   durable state ledger (stage/gate/task status)
 │   └── Decisions-Log.md           #   append-only on-the-fly decisions & clarifications
+├── docs/
+│   ├── Token-Optimization-Review.md   # prompt-surface size review & guidance
+│   └── SDD-Alignment-Review.md        # Specification-Driven Development alignment assessment
 ├── MANIFEST.md
 └── README.md
 ```
 
 `.github/` is the **single source of truth** and the installable workteam. Custom agents live under
 `.github/agents/`; reusable Agent Skills live under `.github/skills/<skill-name>/SKILL.md`.
+`docs/` holds design reviews that inform future changes (token optimization, SDD alignment).
 
 `.workteam/` is the Coordinator's **durable memory**, created at run time in the project the workteam is
 operating on. It is committed by default so a project can version its workteam progress; delete it to

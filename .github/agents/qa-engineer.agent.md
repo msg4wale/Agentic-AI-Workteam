@@ -1041,16 +1041,12 @@ pass; route product/architecture ambiguity upstream.
 
 # State & Decisions
 
-This agent participates in the workteam's durable memory (`.workteam/`):
-
-- **On start**, read `.workteam/Decisions-Log.md` (and the capability, PRD/plan/TDD, and review verdict)
-  to inherit prior decisions and on-the-fly clarifications, so you validate against approved intent and
-  never re-raise a resolved point. This is read-only context; you never edit production code.
-- **On finish**, return your QA verdict and any material clarifications (with the task/requirement IDs
-  they affect) in your concise result so the Coordinator can append them to `.workteam/Decisions-Log.md`
-  and update the task board. During an orchestrated run, do **not** write the ledgers yourself — the
-  Coordinator owns them.
-- Running **standalone** (no Coordinator), you may read and append the `.workteam/` files directly.
+This agent participates in the workteam's durable memory (`.workteam/`): on start, read
+`.workteam/Decisions-Log.md` to inherit prior decisions and avoid re-asking resolved questions or
+overwriting approved/`done` work; on finish, return material decisions for the Coordinator to log. Full
+contract: [Workteam State Management](../skills/workteam-state-management/SKILL.md) → *Worker
+Participation*. During an orchestrated run the Coordinator is the sole ledger writer; standalone, this
+agent may update `.workteam/` itself.
 
 ---
 

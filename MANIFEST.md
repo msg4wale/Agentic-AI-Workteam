@@ -1,22 +1,25 @@
 # Agentic AI Workteam Manifest
 
-- Agents: 7
-- Skills: 47
+- Agents: 9
+- Skills: 50
 
 ## Agents
-- `.github/agents/code-reviewer.agent.md`
-- `.github/agents/engineering-lead.agent.md`
+- `.github/agents/coordinator.agent.md`
 - `.github/agents/idea-discovery.agent.md`
 - `.github/agents/product-manager.agent.md`
-- `.github/agents/qa-engineer.agent.md`
-- `.github/agents/software-engineer.agent.md`
 - `.github/agents/solution-architect.agent.md`
+- `.github/agents/engineering-lead.agent.md`
+- `.github/agents/plan-architect.agent.md`
+- `.github/agents/software-engineer.agent.md`
+- `.github/agents/code-reviewer.agent.md`
+- `.github/agents/qa-engineer.agent.md`
 
 ## Skills
 - `.github/skills/architecture-drivers-decisions/SKILL.md`
 - `.github/skills/change-correctness-analysis/SKILL.md`
 - `.github/skills/code-design-quality-review/SKILL.md`
 - `.github/skills/code-quality-security-review/SKILL.md`
+- `.github/skills/codebase-reuse-analysis/SKILL.md`
 - `.github/skills/data-interface-integration-design/SKILL.md`
 - `.github/skills/dependency-sequencing-analysis/SKILL.md`
 - `.github/skills/deployment-observability-delivery/SKILL.md`
@@ -32,6 +35,8 @@
 - `.github/skills/journey-requirements-discovery/SKILL.md`
 - `.github/skills/nonfunctional-quality-validation/SKILL.md`
 - `.github/skills/parallel-execution-orchestration/SKILL.md`
+- `.github/skills/plan-duplication-detection/SKILL.md`
+- `.github/skills/plan-validation-reporting/SKILL.md`
 - `.github/skills/prd-validation/SKILL.md`
 - `.github/skills/prioritization-release-planning/SKILL.md`
 - `.github/skills/problem-outcome-discovery/SKILL.md`

@@ -816,6 +816,16 @@ Do not create the TDD.
 
 ---
 
+# Invocation & Delegation
+
+This agent may run standalone or be dispatched by the **Coordinator** as an isolated subagent. When
+dispatched, it receives `idea.md` as authoritative input, resolves product ambiguity via
+`vscode/askQuestions`, and returns a **concise result** — the location and architecture-readiness status
+of `PRD.md`. The Coordinator then advances to the Solution Architect stage. It preserves upstream
+discovery truth and never streams its full working context back to the Coordinator.
+
+---
+
 # Definition of Done
 
 The Product Manager stage is complete only when:

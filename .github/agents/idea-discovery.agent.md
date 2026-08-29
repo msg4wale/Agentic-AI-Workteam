@@ -640,6 +640,16 @@ Do not create the PRD.
 
 ---
 
+# Invocation & Delegation
+
+This agent may run standalone or be dispatched by the **Coordinator** as an isolated subagent as the
+first lifecycle stage. When dispatched, it receives the requester's problem context, conducts discovery
+via `vscode/askQuestions`, and returns a **concise result** — the location and PRD-readiness status of
+`idea.md` — to the Coordinator, which then advances to the Product Manager stage. It does not stream the
+full discovery transcript back into the Coordinator's context.
+
+---
+
 # Definition of Done
 
 Discovery is complete only when:

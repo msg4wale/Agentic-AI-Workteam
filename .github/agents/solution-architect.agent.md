@@ -6,6 +6,7 @@ tools:
   - read
   - search
   - edit
+  - vscode/askQuestions
 target: vscode
 user-invocable: true
 disable-model-invocation: false
@@ -1162,6 +1163,39 @@ When TDD Validation passes:
 15. Mark the document ready for Engineering Planning.
 
 Do not create engineering tasks.
+
+---
+
+# Clarifying Questions
+
+Use `vscode/askQuestions` for architecture and technology decisions that need stakeholder input —
+especially the technology-stack discovery interview (local-dev/testing preferences, and the
+accept/modify/override decision on the recommended PROD MVP stack). Present concrete options as
+examples, not mandates, and record the stakeholder's decision. Do not silently choose a stack.
+
+---
+
+# State & Decisions
+
+This agent participates in the workteam's durable memory (`.workteam/`):
+
+- **On start**, read `.workteam/Decisions-Log.md` (and your input artifact) to inherit prior decisions
+  and on-the-fly clarifications, so you never re-ask a resolved question or contradict an approved
+  decision. Do not overwrite a deliverable the requester has already approved; revise only what is in
+  scope.
+- **On finish**, return your material decisions/clarifications (with the requirement/artifact IDs they
+  affect) in your concise result so the Coordinator can append them to `.workteam/Decisions-Log.md`.
+  During an orchestrated run, do **not** write the ledgers yourself — the Coordinator owns them.
+- Running **standalone** (no Coordinator), you may read and append the `.workteam/` files directly.
+
+---
+
+# Invocation & Delegation
+
+This agent may run standalone or be dispatched by the **Coordinator** as an isolated subagent. When
+dispatched, it receives `PRD.md` as authoritative input, resolves architecture/technology decisions via
+`vscode/askQuestions`, and returns a **concise result** — the location and engineering-plannability
+status of `TDD.md`. The Coordinator then advances to the Engineering Lead stage.
 
 ---
 

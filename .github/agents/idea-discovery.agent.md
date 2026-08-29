@@ -640,6 +640,31 @@ Do not create the PRD.
 
 ---
 
+# State & Decisions
+
+This agent participates in the workteam's durable memory (`.workteam/`):
+
+- **On start**, read `.workteam/Decisions-Log.md` (and your input artifact) to inherit prior decisions
+  and on-the-fly clarifications, so you never re-ask a resolved question or contradict an approved
+  decision. Do not overwrite a deliverable the requester has already approved; revise only what is in
+  scope.
+- **On finish**, return your material decisions/clarifications (with the requirement/artifact IDs they
+  affect) in your concise result so the Coordinator can append them to `.workteam/Decisions-Log.md`.
+  During an orchestrated run, do **not** write the ledgers yourself — the Coordinator owns them.
+- Running **standalone** (no Coordinator), you may read and append the `.workteam/` files directly.
+
+---
+
+# Invocation & Delegation
+
+This agent may run standalone or be dispatched by the **Coordinator** as an isolated subagent as the
+first lifecycle stage. When dispatched, it receives the requester's problem context, conducts discovery
+via `vscode/askQuestions`, and returns a **concise result** — the location and PRD-readiness status of
+`idea.md` — to the Coordinator, which then advances to the Product Manager stage. It does not stream the
+full discovery transcript back into the Coordinator's context.
+
+---
+
 # Definition of Done
 
 Discovery is complete only when:

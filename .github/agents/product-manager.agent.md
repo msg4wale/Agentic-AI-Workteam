@@ -816,6 +816,31 @@ Do not create the TDD.
 
 ---
 
+# State & Decisions
+
+This agent participates in the workteam's durable memory (`.workteam/`):
+
+- **On start**, read `.workteam/Decisions-Log.md` (and your input artifact) to inherit prior decisions
+  and on-the-fly clarifications, so you never re-ask a resolved question or contradict an approved
+  decision. Do not overwrite a deliverable the requester has already approved; revise only what is in
+  scope.
+- **On finish**, return your material decisions/clarifications (with the requirement/artifact IDs they
+  affect) in your concise result so the Coordinator can append them to `.workteam/Decisions-Log.md`.
+  During an orchestrated run, do **not** write the ledgers yourself — the Coordinator owns them.
+- Running **standalone** (no Coordinator), you may read and append the `.workteam/` files directly.
+
+---
+
+# Invocation & Delegation
+
+This agent may run standalone or be dispatched by the **Coordinator** as an isolated subagent. When
+dispatched, it receives `idea.md` as authoritative input, resolves product ambiguity via
+`vscode/askQuestions`, and returns a **concise result** — the location and architecture-readiness status
+of `PRD.md`. The Coordinator then advances to the Solution Architect stage. It preserves upstream
+discovery truth and never streams its full working context back to the Coordinator.
+
+---
+
 # Definition of Done
 
 The Product Manager stage is complete only when:

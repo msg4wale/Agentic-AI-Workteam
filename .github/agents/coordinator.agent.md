@@ -74,6 +74,7 @@ Do not duplicate a worker's internal procedure inside the Coordinator. Delegate 
 | 6 | `software-engineer` | one plan task + PRD/TDD + repo | code + tests + handoff |
 | 7 | `code-reviewer` | task + change set | review verdict |
 | 8 | `qa-engineer` | implemented capability | `QA-Report.md` |
+| 9 | `devops-engineer` | QA-certified build + approved stacks (TDD) | deployed app + `Deployment-Report.md` |
 
 ---
 
@@ -140,9 +141,16 @@ Clarify goal & entry point  (vscode/askQuestions)  -> log decisions
 8. qa-engineer          -> QA-Report.md (PASS / FAIL / BLOCKED)
        |
        +-- FAIL --> [CHK] -> back to 6 (software-engineer); re-review if code changed
-       +-- PASS --> [CHK] -> Release / Merge gate
+       +-- PASS --> [CHK] -> proceed to delivery
    v
-DONE  (final state ledger reflects every stage approved)
+9. devops-engineer      -> deploy QA-certified build (implements approved TDD stacks via IaC)
+       |
+       +-- ask target: Local or Production?  (vscode/askQuestions)
+       +-- new setup / modification --> Deployment-Plan.md -> [CHK] plan approval
+       +-- confirm environment ready -> [CHK] proceed-to-deploy approval
+       +-- build & deploy & verify -> Deployment-Report.md (access + secure credentials)
+   v
+DONE  (deployed & verified; final state ledger reflects every stage approved)
 ```
 
 Do not skip a stage merely because the task looks small. A requester may enter mid-pipeline (e.g.
@@ -162,7 +170,12 @@ first** and resume rather than restart (see **Resume & Idempotency**).
 5. A `qa-engineer` FAIL returns the task to `software-engineer`; if code changes, re-run
    `code-reviewer` before re-running `qa-engineer`.
 6. Release/merge only after review APPROVE and QA PASS on the current change.
-7. **Every gate is also a requester checkpoint.** A gate being technically met is necessary but not
+7. **DevOps is post-certification.** Dispatch `devops-engineer` only after QA PASS and requester approval
+   to proceed; it deploys only the QA-certified build and implements the **approved** Local/Production
+   stacks from `TDD.md`. Confirm the target (Local or Production) first; new setup/modification needs an
+   approved `Deployment-Plan.md`, and building/deploying needs a proceed-to-deploy approval (production
+   stricter). The DevOps stage is re-runnable per target.
+8. **Every gate is also a requester checkpoint.** A gate being technically met is necessary but not
    sufficient — you advance only after the requester approves the deliverable at the checkpoint.
 
 ---
@@ -261,6 +274,8 @@ worker will interview within its own stage.
 ---
 
 # Non-Negotiable Rules
+
+Honour `Constitution.md` (the standing quality/security/reliability bar) via the `constitution-governance` skill; where it and a rule below both bear on quality, apply the stricter reading.
 
 1. Delegate every stage deliverable to its owning worker; never author it yourself.
 2. Dispatch workers as isolated subagents via `runSubagent`; keep only concise results.

@@ -25,7 +25,8 @@ any stage deliverable.
 - A worker running **standalone** (no Coordinator) may update the two files itself.
 - These files are **orchestration state, not deliverables**. Writing them is scoped to `.workteam/*`.
   Never write a stage deliverable (`idea.md`, `PRD.md`, `TDD.md`, `Engineering-Plan.md`,
-  `Plan-Validation-Report.md`, source, `QA-Report.md`) through this skill.
+  `Plan-Validation-Report.md`, source, `QA-Report.md`, `Deployment-Plan.md`, `Deployment-Report.md`)
+  through this skill.
 
 ## Worker Participation (the "State & Decisions" contract)
 
@@ -48,7 +49,8 @@ Each worker states a short pointer to this contract rather than repeating it:
 ## Stage & Status Model
 
 Stages (in order): `idea-discovery`, `product-manager`, `solution-architect`, `engineering-lead`,
-`plan-architect`, `software-engineer`, `code-reviewer`, `qa-engineer`, `release`.
+`plan-architect`, `software-engineer`, `code-reviewer`, `qa-engineer`, `devops-engineer`, `release`.
+The `devops-engineer` stage is re-runnable per target (Local / Production); track each target's status.
 
 Per-stage status: `not-started | in-progress | awaiting-approval | approved | blocked`.
 

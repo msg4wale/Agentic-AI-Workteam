@@ -28,6 +28,14 @@ serial.**
   gate, and task status) and `.workteam/Decisions-Log.md` (every on-the-fly clarification). After any
   disruption it **resumes exactly where it stopped** — never re-running an approved stage, overwriting
   an approved deliverable, or duplicating a completed task.
+- **DevOps Engineer** — after QA certifies a build, builds/releases it and provisions the **local** or
+  **production** environment via **Infrastructure as Code**, deploys behind approval checkpoints, and
+  hands over access. The Solution Architect recommends and gets approval for **both** a local dev/test
+  stack (open-source + IaC) and a production stack.
+- **Constitution** — a shipped, tailorable `Constitution.md` states the durable quality/spec/security
+  principles the whole team is held to; agents load it on demand.
+- **Leaner agent prompts** — the large deliverable templates now live in on-demand `*-output-contract`
+  skills, keeping each agent's always-loaded prompt focused on its rules and gates.
 
 ## How progression works
 
@@ -56,6 +64,7 @@ resume later: the Coordinator reads the ledger first and continues from the firs
 | 6 | Software Engineer | Implementation | One approved task | Repository change + PR-ready handoff |
 | 7 | Code Reviewer | Independent review (parallel perspectives) | Task + diff/change set | Approve / changes required / blocked |
 | 8 | QA Engineer | Independent QA (parallel perspectives) | Implemented capability | `QA-Report.md` + QA evidence |
+| 9 | DevOps Engineer | Build, release, deploy; provision local/prod infra (IaC) | QA-certified build + approved stacks | Deployed app + `Deployment-Report.md` |
 
 ## Per-Role Tool Tailoring
 
@@ -72,6 +81,7 @@ Each agent is granted only the tools its responsibility requires.
 | Software Engineer | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
 | Code Reviewer | ✓ | ✓ | ✓† | ✓ | ✓ | ✓ |
 | QA Engineer | ✓ | ✓ | ✓‡ | ✓ | ✓ | ✓ |
+| DevOps Engineer | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
 
 \* Plan Architect `edit` is scoped to `Plan-Validation-Report.md` only.
 † Code Reviewer `edit` is scoped to its own review report artifact only — **never production code**.
@@ -129,10 +139,17 @@ Coordinator  (reads .workteam/ state first & resumes; clarifies goal via #vscode
                           |                                   |
                           |                        +----------+----------+
                           |                        |                     |
-                          +--- QA FAIL          QA FAIL               QA PASS
+                          +--- QA FAIL          QA FAIL               QA PASS [CHK]
                                                                         |
                                                                         v
-                                                            Release / Merge Gate [CHK]
+                                              9. DevOps Engineer  (implements approved TDD stacks via IaC)
+                                                 - target? Local | Production
+                                                 - new/changed infra -> Deployment-Plan.md [CHK]
+                                                 - env ready -> proceed-to-deploy [CHK]
+                                                 - build + deploy + verify
+                                                                        |
+                                                                        v
+                                              Deployment-Report.md  (access + secure credentials)
 
 Every stage transition updates .workteam/Workteam-State.md (stage/gate/task status) and
 .workteam/Decisions-Log.md (clarifications). On restart the Coordinator reads these and resumes at the
@@ -379,6 +396,38 @@ only after all return. `FAIL` routes back to the Software Engineer (re-review if
 
 ---
 
+## 9. DevOps Engineer Agent
+
+**Purpose:** Deliver the QA-certified application into a running environment. Build, release, and publish
+the software, and provision the **local** or **production** environment and infrastructure it needs using
+**Infrastructure as Code** — activated only after QA PASS + approval, implementing the **approved** stacks
+from `TDD.md`. **Read-only on production/source code** (it never edits the app); it authors IaC and runs
+provisioning/deploys behind approval checkpoints.
+
+**Input:** QA-certified build + approved Local/Production stacks (`TDD.md`) + infra state →
+**Output:** provisioned infra (IaC), deployed & verified app, `Deployment-Plan.md`, `Deployment-Report.md`
+
+**Agent:** `.github/agents/devops-engineer.agent.md`
+
+### Skills
+
+| Skill | Responsibility |
+|---|---|
+| `deployment-readiness-analysis` | Confirm QA certification, the certified build, and the approved target stack; select target. |
+| `infrastructure-as-code-authoring` | Author/update reproducible IaC (Compose/Terraform/Pulumi/Ansible/K8s/Helm) for the approved stack. |
+| `environment-provisioning` | Detect env/infra state (exists/healthy/needs-change) and provision or verify it idempotently. |
+| `deployment-plan-design` | Break new setup/modification into a granular `Deployment-Plan.md` with order, risks, rollback. |
+| `build-release-packaging` | Build, version, package, and publish the certified release artifact/image. |
+| `deploy-execution-verification` | Execute the deploy, run smoke/health checks, and roll back safely on failure. |
+| `deployment-reporting-handover` | Produce `Deployment-Report.md` with access details and secure credential referencing. |
+
+Flow: confirm target (Local/Production) → assess env → if new/changed, an approved `Deployment-Plan.md` →
+confirm ready → proceed-to-deploy approval → build & deploy & verify → `Deployment-Report.md`. Local
+platforms must be open-source and IaC-deployable; **secrets are never committed** — the report references
+a secure store. Re-runnable per target.
+
+---
+
 # Traceability Model
 
 The workteam preserves traceability across the lifecycle:
@@ -417,9 +466,11 @@ Agentic-AI-Workteam/
 │   │   ├── plan-architect.agent.md
 │   │   ├── software-engineer.agent.md
 │   │   ├── code-reviewer.agent.md
-│   │   └── qa-engineer.agent.md
+│   │   ├── qa-engineer.agent.md
+│   │   └── devops-engineer.agent.md
 │   └── skills/
 │       └── <reusable skill folders>/SKILL.md
+├── Constitution.md                # durable quality/spec/security principles (tailor per project)
 ├── .workteam/                     # created at run time in the TARGET project (not shipped here)
 │   ├── Workteam-State.md          #   durable state ledger (stage/gate/task status)
 │   └── Decisions-Log.md           #   append-only on-the-fly decisions & clarifications
@@ -432,7 +483,10 @@ Agentic-AI-Workteam/
 
 `.github/` is the **single source of truth** and the installable workteam. Custom agents live under
 `.github/agents/`; reusable Agent Skills live under `.github/skills/<skill-name>/SKILL.md`.
+`Constitution.md` is the standing quality/spec/security bar every agent honours (via the
+`constitution-governance` skill) — tailor it per project.
 `docs/` holds design reviews that inform future changes (token optimization, SDD alignment).
+The DevOps Engineer also produces `Deployment-Plan.md` / `Deployment-Report.md` at the target project root.
 
 `.workteam/` is the Coordinator's **durable memory**, created at run time in the project the workteam is
 operating on. It is committed by default so a project can version its workteam progress; delete it to
@@ -490,7 +544,14 @@ directly for a single stage.
    loops back to Software Engineering.
 6. **QA Engineer** runs its four perspectives in parallel and returns a verdict; `FAIL` loops back to
    Software Engineering (re-review if code changes).
-7. Release/merge only when review and QA gates pass **and** you approve at the checkpoint.
+7. On **QA PASS + your approval**, the **DevOps Engineer** is activated: it confirms the target (Local or
+   Production), provisions/verifies the environment via IaC (an approved `Deployment-Plan.md` first if new
+   setup/changes are needed), builds and deploys the certified build behind a proceed-to-deploy approval,
+   verifies it, and delivers `Deployment-Report.md` with access details and secure credential referencing.
+   Re-run it per target. Release/merge only when review and QA pass **and** you approve at the checkpoint.
+
+Throughout, every agent honours `Constitution.md` — the standing quality/spec/security bar (tailor it per
+project).
 
 **Resuming after a disruption:** just invoke the Coordinator again. It reads `.workteam/Workteam-State.md`
 and `.workteam/Decisions-Log.md`, continues from the first unapproved stage, and never re-runs an
@@ -515,9 +576,13 @@ approved stage, overwrites an approved deliverable, or re-dispatches a completed
   never on a technically-met gate alone.
 - **Durable, resumable state.** Stage/task status and every decision live in `.workteam/`, so a disrupted
   run resumes exactly where it stopped — idempotent, no re-running or duplication.
+- **Governed by a constitution.** `Constitution.md` states the durable quality/spec/security bar every
+  agent honours; the stricter of a stage rule and the constitution wins.
+- **Reproducible, IaC-provisioned delivery.** Environments are Infrastructure as Code (open-source local),
+  secrets are never committed, and infrastructure changes are idempotent.
 - **Source-of-truth hierarchy.** Downstream agents do not rewrite upstream intent.
 - **Parallelize independent work; serialize dependent decisions.**
-- **Evidence over claims.** Tests, review findings, and QA verdicts trace to actual evidence.
+- **Evidence over claims.** Tests, review findings, QA verdicts, and deployment results trace to actual evidence.
 
 ---
 
@@ -533,3 +598,7 @@ This repository contains the Coordinator-orchestrated redesign:
 - Software Engineer with controlled `runSubagent` parallel execution and reuse-target adherence
 - Code Reviewer with five parallel, blind review perspectives (read-only on production code)
 - QA Engineer with four parallel, blind validation perspectives (read-only on production code)
+- DevOps Engineer with IaC provisioning and gated build/deploy of the QA-certified build to Local or
+  Production, plus dual-stack (local + production) recommendation and approval in the Solution Architect
+- Shipped, tailorable `Constitution.md` governing quality/spec/security across the team
+- Leaner agent prompts: large deliverable templates moved into on-demand `*-output-contract` skills

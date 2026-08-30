@@ -1,37 +1,48 @@
 # Agentic AI Workteam Manifest
 
-- Agents: 9
-- Skills: 52
+- Agents: 10
+- Skills: 65
 
 ## Agents
-- `.github/agents/coordinator.agent.md`
-- `.github/agents/idea-discovery.agent.md`
-- `.github/agents/product-manager.agent.md`
-- `.github/agents/solution-architect.agent.md`
-- `.github/agents/engineering-lead.agent.md`
-- `.github/agents/plan-architect.agent.md`
-- `.github/agents/software-engineer.agent.md`
 - `.github/agents/code-reviewer.agent.md`
+- `.github/agents/coordinator.agent.md`
+- `.github/agents/devops-engineer.agent.md`
+- `.github/agents/engineering-lead.agent.md`
+- `.github/agents/idea-discovery.agent.md`
+- `.github/agents/plan-architect.agent.md`
+- `.github/agents/product-manager.agent.md`
 - `.github/agents/qa-engineer.agent.md`
+- `.github/agents/software-engineer.agent.md`
+- `.github/agents/solution-architect.agent.md`
 
 ## Skills
 - `.github/skills/architecture-drivers-decisions/SKILL.md`
+- `.github/skills/build-release-packaging/SKILL.md`
 - `.github/skills/change-correctness-analysis/SKILL.md`
 - `.github/skills/code-design-quality-review/SKILL.md`
 - `.github/skills/code-quality-security-review/SKILL.md`
 - `.github/skills/codebase-reuse-analysis/SKILL.md`
+- `.github/skills/constitution-governance/SKILL.md`
 - `.github/skills/data-interface-integration-design/SKILL.md`
 - `.github/skills/dependency-sequencing-analysis/SKILL.md`
+- `.github/skills/deploy-execution-verification/SKILL.md`
 - `.github/skills/deployment-observability-delivery/SKILL.md`
+- `.github/skills/deployment-plan-design/SKILL.md`
+- `.github/skills/deployment-readiness-analysis/SKILL.md`
+- `.github/skills/deployment-reporting-handover/SKILL.md`
 - `.github/skills/engineering-issue-specification/SKILL.md`
+- `.github/skills/engineering-plan-output-contract/SKILL.md`
 - `.github/skills/engineering-plan-validation/SKILL.md`
 - `.github/skills/engineering-readiness-analysis/SKILL.md`
+- `.github/skills/environment-provisioning/SKILL.md`
 - `.github/skills/epic-user-story-design/SKILL.md`
 - `.github/skills/existing-system-discovery/SKILL.md`
 - `.github/skills/focused-implementation/SKILL.md`
 - `.github/skills/functional-acceptance-validation/SKILL.md`
 - `.github/skills/idea-validation/SKILL.md`
+- `.github/skills/implementation-handoff-contract/SKILL.md`
 - `.github/skills/implementation-handoff-validation/SKILL.md`
+- `.github/skills/infrastructure-as-code-authoring/SKILL.md`
 - `.github/skills/integration-data-failure-validation/SKILL.md`
 - `.github/skills/journey-requirements-discovery/SKILL.md`
 - `.github/skills/nonfunctional-quality-validation/SKILL.md`
@@ -45,6 +56,7 @@
 - `.github/skills/product-quality-metrics/SKILL.md`
 - `.github/skills/qa-decision-defect-reporting/SKILL.md`
 - `.github/skills/qa-readiness-context/SKILL.md`
+- `.github/skills/qa-report-contract/SKILL.md`
 - `.github/skills/qa-verification-planning/SKILL.md`
 - `.github/skills/quality-edge-case-discovery/SKILL.md`
 - `.github/skills/regression-evidence-validation/SKILL.md`
@@ -53,6 +65,7 @@
 - `.github/skills/requirements-acceptance-criteria/SKILL.md`
 - `.github/skills/review-decision-validation/SKILL.md`
 - `.github/skills/review-readiness-context/SKILL.md`
+- `.github/skills/review-report-contract/SKILL.md`
 - `.github/skills/risk-based-test-design/SKILL.md`
 - `.github/skills/scope-risk-discovery/SKILL.md`
 - `.github/skills/security-data-integrity-review/SKILL.md`
@@ -61,6 +74,7 @@
 - `.github/skills/subagent-parallel-execution/SKILL.md`
 - `.github/skills/system-component-design/SKILL.md`
 - `.github/skills/task-readiness-analysis/SKILL.md`
+- `.github/skills/tdd-output-contract/SKILL.md`
 - `.github/skills/tdd-validation/SKILL.md`
 - `.github/skills/technical-task-decomposition/SKILL.md`
 - `.github/skills/technology-stack-discovery/SKILL.md`

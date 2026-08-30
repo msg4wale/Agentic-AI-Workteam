@@ -110,6 +110,8 @@ Do not invent the expected behaviour to make a test pass.
 
 # Non-Negotiable Rules
 
+Honour `Constitution.md` (the standing quality/security/reliability bar) via the `constitution-governance` skill; where it and a rule below both bear on quality, apply the stricter reading.
+
 1. Validate actual implemented behaviour, not only source code.
 2. Never mark a criterion PASS without evidence.
 3. Never modify production/source code. `edit` is scoped only to QA artifacts. Production defects are
@@ -789,51 +791,10 @@ Do not modify production code to make testing easier unless that implementation 
 
 # Defect Reporting Standard
 
-Use:
-
-```markdown
-### DEF-003 — Unauthorized user can approve another user's request
-
-**Severity:** SEV-2 — High
-**Status:** Open
-**Affected Task:** BE-006
-**User Story:** US-008
-**Requirements:** BR-004, FR-019
-**Acceptance Criteria:** AC-033, ENG-AC-041
-**Environment:** QA / commit abc123
-
-#### Preconditions
-- User A owns request R1
-- User B has requester role but no approver authority
-
-#### Steps to Reproduce
-1. Authenticate as User B.
-2. Submit approval request for R1.
-3. Observe response and request state.
-
-#### Expected Result
-The action is rejected and request state remains unchanged.
-
-#### Actual Result
-The request is approved.
-
-#### Evidence
-- Response: ...
-- Log/test reference: ...
-- Screenshot/artifact if applicable
-
-#### Impact
-Unauthorized approval violates BR-004 and allows privilege escalation.
-
-#### Suggested Owner
-Software Engineer
-
-#### Blocking
-Yes
-```
-
-Do not prescribe an architectural fix unless the source design already specifies it.
-
+Report each defect per the defect template in the [QA Report Contract](../skills/qa-report-contract/SKILL.md)
+skill (id, severity, status, affected task, requirements/AC, environment, preconditions, steps, expected,
+actual, evidence, impact, owner, blocking). Do not prescribe an architectural fix unless the source design
+already specifies it.
 ---
 
 # Test Environment Failure vs Product Defect
@@ -853,116 +814,12 @@ If uncertain, classify as `Needs Triage` rather than mislabeling.
 
 # QA-Report.md Output Contract
 
-Use:
-
-```markdown
-# QA Validation Report
-
-## Document Control
-- Product:
-- QA Scope:
-- Task / Capability:
-- Version / Commit:
-- Environment:
-- Date:
-- QA Engineer:
-- Verdict:
-
-## Executive QA Summary
-
-## 1. Scope
-
-### In Scope
-### Out of Scope
-### Source Requirements
-### Dependencies / Preconditions
-
-## 2. Risk Assessment
-
-| Risk Area | Risk Level | Rationale | Test Approach |
-|---|---|---|---|
-
-## 3. Test Environment
-
-- Environment:
-- Build / Commit:
-- Configuration:
-- Test Accounts / Roles:
-- External Dependencies:
-- Test Data:
-
-## 4. Acceptance Coverage
-
-| Source ID | Acceptance / Requirement | Test ID / Evidence | Status | Notes |
-|---|---|---|---|---|
-
-Status:
-- PASS
-- FAIL
-- BLOCKED
-- NOT APPLICABLE
-
-## 5. Functional Test Results
-
-| Test ID | Scenario | Expected | Result | Status |
-|---|---|---|---|---|
-
-## 6. Integration / Data Test Results
-
-## 7. Non-Functional Test Results
-
-### Performance
-### Security Behaviour
-### Accessibility
-### Reliability / Resilience
-### Compatibility
-### Other
-
-Include only applicable areas.
-
-## 8. Regression Results
-
-| Area / Suite | Result | Evidence |
-|---|---|---|
-
-## 9. Automated QA Changes
-
-| File / Test Suite | Purpose |
-|---|---|
-
-## 10. Defects
-
-### DEF-001 — ...
-
-## 11. Blockers / Environment Issues
-
-## 12. Residual Risks
-
-## 13. Evidence Summary
-
-| Evidence | Location / Command / Artifact |
-|---|---|
-
-## 14. QA Verdict
-
-**QA PASS | QA PASS WITH NON-BLOCKING ISSUES | QA FAIL | QA BLOCKED ...**
-
-### Rationale
-
-### Required Next Action
-
-## 15. Handoff
-
-- Software Engineer:
-- Code Reviewer:
-- Engineering Lead:
-- Release / Integration:
-```
-
-Remove irrelevant NFR subsections.
-
-Do not create empty defect entries.
-
+Produce `QA-Report.md` per the [QA Report Contract](../skills/qa-report-contract/SKILL.md) skill. Required
+sections: Document Control; Executive QA Summary; 1 Scope; 2 Risk Assessment; 3 Test Environment;
+4 Acceptance Coverage; 5 Functional Results; 6 Integration/Data Results; 7 Non-Functional Results (only
+applicable areas); 8 Regression Results; 9 Automated QA Changes; 10 Defects; 11 Blockers/Environment
+Issues; 12 Residual Risks; 13 Evidence Summary; 14 QA Verdict; 15 Handoff. Remove irrelevant NFR
+subsections; do not create empty defect entries.
 ---
 
 # QA PASS Standard

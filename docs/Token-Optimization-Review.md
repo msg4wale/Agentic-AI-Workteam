@@ -38,21 +38,22 @@ always-loaded cost; the Coordinator and Plan Architect are already lean (~2k / ~
    decisions for the Coordinator to log). Net: ~40–60 lines / ~150–200 words removed from the
    always-loaded surface, and the canonical text is now single-sourced (no drift across 8 files).
 
-### Recommended next (deferred — larger savings, more churn)
+### Applied (round 2 — output-contract extraction)
 
-These were **not** applied (they exceed "safe dedup"); they are the high-value opportunities if deeper
-optimization is wanted later. Each moves reference bulk out of the always-loaded agent into an
-on-demand skill, keeping a short pointer in the agent.
+2. **Extracted the large embedded output-contract templates + worked examples** from the five heavy
+   agents into new on-demand `*-output-contract` skills, leaving a short pointer + a terse required-section
+   list in each agent:
+   - `tdd-output-contract` ← `solution-architect` (~4230 → ~3593 words)
+   - `engineering-plan-output-contract` ← `engineering-lead` (~4122 → ~3839 words)
+   - `qa-report-contract` ← `qa-engineer` (report + `DEF-003` sample) (~3448 → ~3140 words)
+   - `review-report-contract` ← `code-reviewer` (report + `[P1]` sample) (~3164 → ~3046 words)
+   - `implementation-handoff-contract` ← `software-engineer` (~3174 → ~3027 words)
+   The `tdd-output-contract` also now hosts the new **Deployment & Infrastructure Stack (15A)** section
+   (the DevOps Engineer's input contract). Behaviour is preserved — the template loads on demand when the
+   deliverable is produced — while ~1k words left the always-loaded surface of those five agents.
 
-2. **Extract large embedded output-contract templates.** The biggest agents carry full markdown
-   templates for their deliverables inline (e.g. the `TDD.md` skeleton in `solution-architect`, the
-   `Engineering-Plan.md` section list in `engineering-lead`, the review/QA report templates in
-   `code-reviewer`/`qa-engineer`). Moving each template into its stage's validation/output skill (or a
-   small `*-output-contract` skill) and referencing it would remove an estimated 1–3k words from the
-   always-loaded surface of those five agents — the single largest available saving.
-3. **Extract worked examples.** The long illustrative task/finding/defect examples (e.g. sample `BE-002`
-   task, sample `[P1]` finding, sample `DEF-003` defect) are teaching aids that rarely need to be in the
-   system prompt; relocate to their skills.
+### Recommended next (still deferred)
+
 4. **Compress repeated severity/verdict catalogues.** `P0–P3`/`SEV-1–4` example lists and verdict
    glossaries are stated at length; the definitions can be terse in the agent with examples pushed to the
    relevant review/QA skill.

@@ -69,6 +69,8 @@ Delegate the detailed method to the skills below. Keep the agent to orchestratio
 
 # Non-Negotiable Rules
 
+Honour `Constitution.md` (the standing quality/security/reliability bar) via the `constitution-governance` skill; where it and a rule below both bear on quality, apply the stricter reading.
+
 1. Never edit production/source code.
 2. Never edit `Engineering-Plan.md`; route revisions to the Engineering Lead.
 3. Only create or modify `Plan-Validation-Report.md`.

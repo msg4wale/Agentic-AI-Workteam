@@ -39,7 +39,7 @@ The traceability chain the framework already enforces —
 | Verify against spec, not vibes | **Strong** | Independent Code Review + QA, each multi-perspective; "evidence over claims"; no PASS without evidence. |
 | Reuse / no duplication | **Strong** | **Plan Architect** gate validates the plan against the codebase and blocks duplicated work — a strong SDD-quality control most spec kits lack. |
 | Drift control when intent changes | **Good** | Upstream routing + the `.workteam/` decision log capture changes; the Coordinator re-dispatches owners rather than patching downstream. |
-| Governing constitution / quality bar | **Partial** | Quality is enforced piecewise (`code-design-quality-review`, `code-quality-security-review`, `testing-verification`) but there is no single, named "constitution" artifact stating the durable quality principles the whole team is held to. |
+| Governing constitution / quality bar | **Strong** | `Constitution.md` now names the durable quality/spec/security principles the whole team honours (via `constitution-governance`), on top of the piecewise enforcement in the review/QA skills. |
 | Executable specification | **Partial** | Acceptance criteria are testable and QA authors tests from them, but the spec itself is prose+IDs, not an executable/spec-as-tests artifact; the link is enforced by process, not mechanically. |
 | Clean / readable / reliable output | **Strong** | Dedicated design-quality review dimension, security/data-integrity review, testing-verification, and QA NFR validation cover cleanliness, readability, and reliability. |
 
@@ -48,11 +48,10 @@ verification (multi-perspective review/QA) and a reuse gate that many SDD toolch
 
 ## Gaps & recommendations (assessment — not applied)
 
-1. **Add an explicit "constitution".** Introduce a single durable-principles artifact (e.g.
-   `.workteam/Constitution.md` or a `project-constitution` skill) stating the non-negotiable quality
-   bar — readability, test expectations, security defaults, dependency/reuse policy, definition of
-   "done" — that every agent references. Today these principles are strong but scattered; naming them
-   once sharpens SDD's "governed by a constitution" tenet and single-sources the quality bar.
+1. ~~**Add an explicit "constitution".**~~ **Implemented.** A tailorable `Constitution.md` now ships at the
+   repo root, stating the non-negotiable quality/spec/security bar (readability, test expectations, security
+   defaults, reuse policy, IaC/open-source-local, definition of done). Agents honour it on demand via the
+   `constitution-governance` skill, and the "Governed by a constitution" tenet is now first-class.
 2. **Make acceptance criteria more executable.** Encourage `AC` written in a checkable form (given/when/
    then or explicit assertions) and have QA link each `TC-*` back to the exact `AC` id it executes, so
    the spec↔test mapping is mechanical, not just narrative.

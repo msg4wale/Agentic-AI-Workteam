@@ -1001,132 +1001,15 @@ API-004 returns the error contract defined in TDD section 9 for validation, conf
 
 # `Engineering-Plan.md` Output Contract
 
-Use:
+Produce `Engineering-Plan.md` per the [Engineering Plan Output Contract](../skills/engineering-plan-output-contract/SKILL.md)
+skill, which holds the full section template. Required top-level sections: Document Control; Executive
+Engineering Summary; 1 Implementation Scope; 2 Implementation Workstreams; 3 Coverage Matrix; 4–12 task
+sections (Backend, Frontend, Database/Data, Integration, Platform/DevOps, Security, Observability, QA,
+Documentation — each task using the Issue-Ready Task Contract); 13 Dependency Matrix; 14 Implementation
+Waves; 15 Parallel Execution Plan; 16 Parallelization Opportunities; 17 Critical Path; 18 Integration
+Checkpoints; 19 Engineering Risks & Blockers; 20 Open Engineering Questions; 21 Handoff Summary.
 
-```markdown
-# Engineering Implementation Plan
-
-## Document Control
-- Product:
-- Version:
-- Status:
-- Last Updated:
-- Engineering Lead:
-- Implementation Readiness:
-- Source PRD: PRD.md
-- Source TDD: TDD.md
-
-## Executive Engineering Summary
-
-## 1. Implementation Scope
-
-### 1.1 MVP Engineering Scope
-### 1.2 Engineering Non-Goals
-### 1.3 Constraints
-### 1.4 Assumptions
-### 1.5 Upstream Open Items
-
-## 2. Implementation Workstreams
-
-| Workstream | Scope | Primary Architecture Components | Task Count |
-|---|---|---|---|
-
-## 3. Coverage Matrix
-
-| Product / Technical Requirement | Architecture Reference | Implementation Task(s) | Verification Task(s) | Coverage Status |
-|---|---|---|---|---|
-
-## 4. Backend Tasks
-
-### BE-001 — ...
-
-[Use Issue-Ready Task Contract]
-
-## 5. Frontend Tasks
-
-### FE-001 — ...
-
-## 6. Database / Data Tasks
-
-### DB-001 — ...
-
-## 7. Integration Tasks
-
-### INT-001 — ...
-
-## 8. Platform / DevOps Tasks
-
-### PLAT-001 — ...
-
-## 9. Security Tasks
-
-### SEC-001 — ...
-
-## 10. Observability / Operations Tasks
-
-### OBS-001 — ...
-
-## 11. QA / Verification Tasks
-
-### QA-001 — ...
-
-## 12. Documentation / Enablement Tasks
-
-### DOC-001 — ...
-
-## 13. Dependency Matrix
-
-| Task | Depends On | Blocks | External Dependencies |
-|---|---|---|---|
-
-Task dependency columns must use task IDs only.
-
-## 14. Implementation Waves
-
-### Wave 0 — Foundations
-### Wave 1 — ...
-### Wave 2 — ...
-
-## 15. Parallel Execution Plan
-
-| Parallel Group | Execution Wave | Tasks | Parallel-Safe | Shared Write Risk | Integration Checkpoint |
-|---|---|---|---|---|---|
-
-Each group contains tasks that may be assigned to separate Software Engineer agents concurrently.
-
-## 16. Parallelization Opportunities
-
-List additional conditional concurrency opportunities and the condition that unlocks them.
-
-## 17. Critical Path
-
-List the task-ID chain(s) that constrain implementation completion.
-
-Do not estimate duration unless requested.
-
-## 18. Integration Checkpoints
-
-Define points where independently developed workstreams must be integrated and verified.
-
-## 19. Engineering Risks and Blockers
-
-| ID | Risk / Blocker | Affected Tasks | Impact | Owner / Upstream Owner | Resolution Needed |
-|---|---|---|---|---|---|
-
-## 20. Open Engineering Questions
-
-| Question | Affected Tasks | Blocking? | Owner | Required Before |
-|---|---|---|---|---|
-
-## 21. Handoff Summary
-
-Summarize readiness for Software Engineering, QA, Platform and other implementation roles.
-```
-
-Remove workstream sections that genuinely do not apply.
-
-Do not create empty task categories.
-
+Remove workstream sections that genuinely do not apply; do not create empty task categories.
 ---
 
 # Implementation-Blocking Topics

@@ -113,6 +113,8 @@ Pure implementation defect within approved design
 
 # Non-Negotiable Rules
 
+Honour `Constitution.md` (the standing quality/security/reliability bar) via the `constitution-governance` skill; where it and a rule below both bear on quality, apply the stricter reading.
+
 1. Implement exactly one assigned task unless the user explicitly assigns multiple tasks.
 2. Read the assigned task completely before editing.
 3. Read only the PRD/TDD sections necessary to understand the task and its source references.
@@ -725,97 +727,13 @@ unless the task explicitly allows an alternative verification path.
 
 # Implementation Handoff Contract
 
-At completion, return a concise handoff using this structure:
-
-```markdown
-## Implementation Result
-
-**Task:** BE-002 — [Title]
-**Status:** READY FOR CODE REVIEW
-
-### Execution Model
-
-- Subagents used: [Yes/No]
-- Parallel analysis performed: [areas]
-- Parallel implementation performed: [Yes/No; ownership boundaries]
-- Integration checkpoint: [if applicable]
-
-### Implemented
-
-- [Concise change]
-- [Concise change]
-
-### Changed Files
-
-- `path/file.ext` — purpose
-- `path/file.ext` — purpose
-
-### Verification
-
-| Check | Result |
-|---|---|
-| `command or check` | PASS |
-| `command or check` | PASS |
-
-### Acceptance Coverage
-
-- ENG-AC-001 — PASS — [evidence]
-- ENG-AC-002 — PASS — [evidence]
-
-### Deviations / Decisions
-
-- None
-
-### Known Issues / Follow-Ups
-
-- None
-
-### Review Focus
-
-- [Area reviewers should pay particular attention to]
-```
-
-If blocked, replace the completion structure with:
-
-```markdown
-## Implementation Blocked
-
-**Task:** ...
-**Status:** BLOCKED — [TYPE]
-
-### Blocker
-...
-
-### Source Conflict / Missing Decision
-...
-
-### Required Owner
-Product Manager | Solution Architect | Engineering Lead | External
-
-### Required Resolution
-...
-```
-
-Do not create an `Implementation-Report.md` file unless explicitly requested.
-
----
-
-# Pull Request Readiness
-
-The implementation handoff should be suitable as the basis of a PR description.
-
-It must communicate:
-
-- what changed;
-- why;
-- task/source references;
-- verification performed;
-- deviations;
-- remaining issues;
-- review focus.
-
-Do not claim a PR was created unless the environment/tooling actually created one.
-
+Return the PR-ready handoff per the [Implementation Handoff Contract](../skills/implementation-handoff-contract/SKILL.md)
+skill: task + status; Execution Model; Implemented; Changed Files; Verification (checks + results);
+Acceptance Coverage (each ENG-AC with evidence); Deviations/Decisions; Known Issues/Follow-Ups; Review
+Focus — or the Blocked structure (blocker, source conflict/missing decision, required owner, required
+resolution). The handoff must suit a PR description (what/why, source refs, verification, deviations,
+review focus). Do not create `Implementation-Report.md` unless requested, and do not claim a PR was
+created unless the tooling actually created one.
 ---
 
 # No Hidden Work

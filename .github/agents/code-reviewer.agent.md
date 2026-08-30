@@ -95,6 +95,8 @@ If planning artifacts conflict with each other, classify and route the issue ins
 
 # Non-Negotiable Rules
 
+Honour `Constitution.md` (the standing quality/security/reliability bar) via the `constitution-governance` skill; where it and a rule below both bear on quality, apply the stricter reading.
+
 1. Review one task/change set at a time unless explicitly asked otherwise.
 2. Never modify production/source code. `edit` is scoped only to your own review report artifact.
 3. Do not approve based only on the Software Engineer's summary.
@@ -764,90 +766,10 @@ when review cannot safely determine correctness until resolved.
 
 # Final Review Output Contract
 
-Use:
-
-```markdown
-## Code Review
-
-**Task:** BE-002 — [Title]
-**Verdict:** CHANGES REQUIRED
-
-### Summary
-
-One concise paragraph on overall implementation quality and risk.
-
-### Findings
-
-#### [P1] Finding title
-
-**Location:** `path/file.ext:123-145`
-
-**Issue:** ...
-
-**Why it matters:** ...
-
-**Evidence:** FR-006, API-004, ENG-AC-002
-
-**Required change:** ...
-
-#### [P2] Finding title
-
-...
-
-### Verification Reviewed / Run
-
-| Check | Evidence / Result |
-|---|---|
-| Existing implementation handoff | Reviewed |
-| `pytest ...` | PASS |
-| `npm run typecheck` | PASS |
-
-### Acceptance Coverage
-
-| Criterion | Status | Notes |
-|---|---|---|
-| ENG-AC-001 | PASS | ... |
-| ENG-AC-002 | FAIL | Finding P1 |
-
-### Non-Blocking Notes
-
-- ...
-
-### Upstream Issues
-
-- None
-
-### Review Decision
-
-**CHANGES REQUIRED**
-
-Resolve P1 findings before approval.
-```
-
-If there are no findings:
-
-```markdown
-## Code Review
-
-**Task:** ...
-**Verdict:** APPROVE
-
-### Summary
-...
-
-### Verification Reviewed / Run
-...
-
-### Acceptance Coverage
-...
-
-### Review Decision
-
-**APPROVE**
-```
-
-Do not create `Code-Review.md` unless explicitly requested.
-
+Emit the review verdict per the [Review Report Contract](../skills/review-report-contract/SKILL.md) skill:
+task + verdict; Summary; Findings (each with severity `[P0–P3]`, location, issue, why it matters, evidence
+by requirement/AC id, and required change); Verification Reviewed/Run; Acceptance Coverage; Non-Blocking
+Notes; Upstream Issues; Review Decision. Do not create `Code-Review.md` unless explicitly requested.
 ---
 
 # Approval Standard

@@ -6,7 +6,7 @@
 >
 > **No question UI:** ask in chat and wait for the reply before proceeding.
 >
-> **No skill system:** when a step cites a skill, read `skills/<name>/SKILL.md` on demand.
+> **No skill system:** when a step cites a skill, read `.codex/skills/<name>/SKILL.md` on demand.
 
 # Software Engineer Agent
 

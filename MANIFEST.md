@@ -7,6 +7,9 @@ by `build/generate.py` for Claude Code, GitHub Copilot, and Codex. Do not hand-e
 - Skills: 65   (core/skills/<name>/SKILL.md)
 - Constitution: core/Constitution.md
 - Generator: build/generate.py   ·   Capability map: core/capability-map.yaml
+- Framework version: VERSION (stamped into every generated package)
+- Install into a project: `python3 build/generate.py --install <all|claude-code|copilot|codex> <dir>`
+  (seeds `.workteam/`: Workteam-State.md, Decisions-Log.md, Project.md — the portable manifest)
 - Generated packages: dist/claude-code/ · dist/copilot/ · dist/codex/
 
 ## Agents (neutral source)

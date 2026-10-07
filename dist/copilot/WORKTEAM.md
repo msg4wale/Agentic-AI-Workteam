@@ -1,10 +1,8 @@
-# Agentic AI Workteam (Claude Code)
+# Agentic AI Workteam (GitHub Copilot / VS Code)
 
 - Framework Version: 1.0.0
 
-A coordinator-orchestrated SDLC workteam. Subagents live in `.claude/agents/` and reusable skills in `.claude/skills/`. Start by invoking the **coordinator** subagent with your goal; it dispatches the other agents via the `Task` tool, stops at each stage for your approval, and keeps durable, transferable state under `.workteam/`.
-
-**Capability bindings:** ASK_USER → AskUserQuestion · SUBAGENT → Task · READ/SEARCH/EDIT/SHELL → Read / Grep,Glob / Edit,Write / Bash.
+Agents live in `.github/agents/` and skills in `.github/skills/`. Invoke the **Coordinator** agent with your goal; it dispatches the others via `runSubagent`, stops at each stage for your approval, and keeps durable, transferable state under `.workteam/`.
 
 **Transferable project:** read `.workteam/Project.md` and `.workteam/Workteam-State.md` first; if another harness was last active, reconcile and resume at the first unapproved stage. All agents honour `Constitution.md`.
 

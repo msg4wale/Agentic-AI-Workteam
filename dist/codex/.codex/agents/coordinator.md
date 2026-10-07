@@ -6,7 +6,7 @@
 >
 > **No question UI:** ask in chat and wait for the reply before proceeding.
 >
-> **No skill system:** when a step cites a skill, read `skills/<name>/SKILL.md` on demand.
+> **No skill system:** when a step cites a skill, read `.codex/skills/<name>/SKILL.md` on demand.
 
 # Coordinator Agent
 
@@ -235,6 +235,16 @@ On **every** invocation, before dispatching anything, **read `.workteam/Workteam
 
 The durable state — not your conversation context — is the source of truth for what is done. Treat your
 in-context memory as a cache that may be lost at any time.
+
+**Cross-harness transfer.** A project may be resumed on a different harness than it was started on. Read
+`.workteam/Project.md` **first** (framework version, installed harnesses, last-active-harness), then the
+ledgers. If the last-active-harness differs from where you now run, record the handoff in the Transfer
+Log and continue — never restart. If `Project.md`'s Framework Version differs from the installed
+package's version stamp (in `CLAUDE.md` / `WORKTEAM.md` / `AGENTS.md`), surface the drift to the
+requester before proceeding. Before a session the requester will continue elsewhere, **flush**: make the
+ledgers and `Project.md` true, set last-active-harness, and commit — only committed state transfers. See
+the [Workteam State Management](../skills/workteam-state-management/SKILL.md) skill → *Cross-Harness
+Transfer*.
 
 ---
 

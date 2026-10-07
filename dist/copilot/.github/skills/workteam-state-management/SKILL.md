@@ -7,15 +7,17 @@ description: Maintain durable workteam state and a decision log so the Coordinat
 
 ## Purpose
 
-Give the workteam a **durable memory** so orchestration survives interruption and stays idempotent.
-Two files under `.workteam/` hold everything needed to answer "where are we, what was decided, and
-what is safe to do next":
+Give the workteam a **durable, transferable memory** so orchestration survives interruption, stays
+idempotent, and can resume on a different harness. Three files under `.workteam/` hold everything needed
+to answer "where are we, what was decided, and what is safe to do next":
 
 - `.workteam/Workteam-State.md` — the state ledger (stage/gate/task status, deliverables, open loops).
 - `.workteam/Decisions-Log.md` — an append-only log of on-the-fly decisions and clarifications.
+- `.workteam/Project.md` — the portable project manifest (framework version, installed harnesses,
+  last-active-harness, deliverable index, transfer log) used for cross-harness resume.
 
-This skill defines the file schemas and the read/update/resume/approval protocols. It does not produce
-any stage deliverable.
+This skill defines the file schemas and the read/update/resume/approval/transfer protocols. It does not
+produce any stage deliverable.
 
 ## Ownership & Write Rules
 
@@ -153,6 +155,37 @@ Before any dispatch, **read `.workteam/Workteam-State.md` and `.workteam/Decisio
     are not asked again.
 - If a deliverable's current fingerprint differs from the approved fingerprint, flag it to the user
   rather than silently trusting or overwriting it.
+
+## Cross-Harness Transfer (resume on a different harness)
+
+A project can be started on one harness (Claude Code, Copilot, or Codex) and continued on another. All
+project state is **harness-neutral and git-portable** — deliverables at the project root, and the
+`.workteam/` ledgers. The portable record is **`.workteam/Project.md`** (the project manifest). Only
+**committed** files transfer; ephemeral chat/session context does not — so flush before you switch.
+
+### `Project.md` manifest
+Tracks: Project title, Framework Version, Installed Harnesses, **Last Active Harness @ timestamp**,
+Current Stage (mirrors the state ledger), a Deliverables presence/approval table, and a **Transfer Log**
+(timestamp · from-harness · to-harness · at-stage · notes).
+
+### Flush-on-leave (before switching harness)
+1. Make `Workteam-State.md` and `Decisions-Log.md` reflect true current reality.
+2. Update `Project.md`: set **Last Active Harness** to the current harness + timestamp, refresh Current
+   Stage and the Deliverables table, and append a **Transfer Log** row when you know the target harness.
+3. **Commit** (git). Uncommitted work does not transfer.
+
+### Resume-on-enter (on a possibly different harness)
+1. Read `Project.md` **first**, then the state and decision ledgers.
+2. If **Last Active Harness ≠ the current harness**, note the handoff (append a Transfer Log row) and
+   continue — do not restart.
+3. Resume per **Resume & Idempotency** above (first non-approved stage; never re-run/overwrite/duplicate).
+4. **Version drift:** if `Project.md` Framework Version ≠ the installed package's stamp (in
+   `CLAUDE.md` / `WORKTEAM.md` / `AGENTS.md`), surface it to the user before proceeding — behaviour may
+   differ; offer to re-install matching packages (`build/generate.py --install <harness> .`).
+5. Set Last Active Harness to the current harness and keep maintaining `Project.md` each transition.
+
+The manifest and ledgers reference agents by **slug** and deliverables by **root path**, so nothing in
+them is harness-specific.
 
 ## Boundaries
 

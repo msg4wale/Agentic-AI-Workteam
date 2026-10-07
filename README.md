@@ -471,20 +471,24 @@ Agentic-AI-Workteam/
 │   ├── skills/<name>/SKILL.md
 │   ├── Constitution.md           #   durable quality/spec/security principles (tailor per project)
 │   └── capability-map.yaml       #   neutral capability -> per-harness binding (reference)
-├── build/generate.py            # compiles core/ -> dist/ for every harness (stdlib, idempotent)
-├── dist/                        # GENERATED packages (do not hand-edit) — copy the one you need
+├── VERSION                      # framework version, stamped into every generated package
+├── build/generate.py            # compiles core/ -> dist/; also `--install <harness|all> <dir>`
+├── dist/                        # GENERATED packages (do not hand-edit) — install the one(s) you need
 │   ├── claude-code/   ->  .claude/agents, .claude/skills, CLAUDE.md, Constitution.md
-│   ├── copilot/       ->  .github/agents, .github/skills, Constitution.md
-│   └── codex/         ->  AGENTS.md, agents/, skills/, Constitution.md
+│   ├── copilot/       ->  .github/agents, .github/skills, WORKTEAM.md, Constitution.md
+│   └── codex/         ->  AGENTS.md, .codex/agents, .codex/skills, Constitution.md
 ├── docs/
 │   ├── Platform-Compatibility.md     # capability matrix + Codex degradation + install
+│   ├── Project-Portability.md        # resume a project across harnesses
 │   ├── Token-Optimization-Review.md
 │   └── SDD-Alignment-Review.md
 ├── MANIFEST.md
 └── README.md
 
-# created at run time in the TARGET project (not shipped):
+# created at run time in the TARGET project (harness-neutral, committed → transferable):
 #   .workteam/Workteam-State.md, .workteam/Decisions-Log.md   (durable state + decisions)
+#   .workteam/Project.md                                      (portable manifest: version, harnesses,
+#                                                              last-active-harness, transfer log)
 #   idea.md, PRD.md, TDD.md, Engineering-Plan.md, Plan-Validation-Report.md,
 #   QA-Report.md, Deployment-Plan.md, Deployment-Report.md    (stage deliverables)
 ```
@@ -501,8 +505,15 @@ so a project can version its workteam progress; delete it to start fresh.
 
 # Installation
 
-Pick your harness and copy its package from `dist/` into your target project. Full matrix and
-degradation notes: [docs/Platform-Compatibility.md](docs/Platform-Compatibility.md).
+**Easiest — the installer** (also sets the project up to be transferable across harnesses):
+```bash
+python3 build/generate.py --install all        <YOUR-PROJECT>   # all harnesses, one framework version
+python3 build/generate.py --install claude-code <YOUR-PROJECT>  # or copilot | codex
+```
+It copies the package(s) and seeds `.workteam/` (`Workteam-State.md`, `Decisions-Log.md`, and a stamped
+`Project.md`). Full matrix + degradation: [docs/Platform-Compatibility.md](docs/Platform-Compatibility.md).
+
+Or copy a package by hand:
 
 ### Claude Code
 ```bash
@@ -514,17 +525,24 @@ Invoke the **coordinator** subagent with your goal; it dispatches the others via
 ### GitHub Copilot (VS Code)
 ```bash
 cp -R dist/copilot/.github         <YOUR-PROJECT>/.github
-cp    dist/copilot/Constitution.md <YOUR-PROJECT>/Constitution.md
+cp    dist/copilot/WORKTEAM.md dist/copilot/Constitution.md <YOUR-PROJECT>/
 ```
 Open in VS Code with Copilot agent mode; invoke the **Coordinator** agent.
 
 ### Codex
 ```bash
 cp dist/codex/AGENTS.md dist/codex/Constitution.md <YOUR-PROJECT>/
-cp -R dist/codex/agents dist/codex/skills          <YOUR-PROJECT>/
+cp -R dist/codex/.codex                            <YOUR-PROJECT>/.codex
 ```
-Point Codex at the repo; it reads `AGENTS.md` and runs the pipeline, reading role/skill files on demand
-(single agent, sequential passes — see the compatibility doc).
+Point Codex at the repo; it reads `AGENTS.md` and runs the pipeline, reading `.codex/agents` and
+`.codex/skills` on demand (single agent, sequential passes — see the compatibility doc).
+
+### Transferable projects (start on one harness, resume on another)
+Install **all** harnesses (`--install all`) so the project opens in any of them. Project state is
+harness-neutral and git-portable (deliverables at root + `.workteam/`), so to switch: **flush** (make
+`.workteam/` true, set Last Active Harness in `Project.md`) and **commit**; then on the other harness the
+Coordinator reads `Project.md` first and resumes at the first unapproved stage — no re-running or
+duplication. Only committed state transfers. Guide: [docs/Project-Portability.md](docs/Project-Portability.md).
 
 ### Customising
 Edit `core/` (never `dist/`), then regenerate:

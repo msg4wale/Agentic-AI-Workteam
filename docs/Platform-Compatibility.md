@@ -8,7 +8,7 @@ the Codex degradations, and how to install each.
 
 | Capability | Claude Code | GitHub Copilot (VS Code) | Codex |
 |---|---|---|---|
-| Agent definitions | `.claude/agents/<slug>.md` (subagents) | `.github/agents/<slug>.agent.md` | roles in `agents/<slug>.md`, driven by `AGENTS.md` |
+| Agent definitions | `.claude/agents/<slug>.md` (subagents) | `.github/agents/<slug>.agent.md` | roles in `.codex/agents/<slug>.md`, driven by `AGENTS.md` |
 | Skills / progressive disclosure | ✅ `.claude/skills` | ✅ `.github/skills` | ⚠️ plain files, read on demand |
 | Subagents (`SUBAGENT`) | ✅ `Task` tool | ✅ `runSubagent` | ❌ none → **sequential passes** |
 | Interactive questions (`ASK_USER`) | ✅ `AskUserQuestion` | ✅ `#vscode/askQuestions` | ⚠️ ask inline in chat |
@@ -38,32 +38,39 @@ Behaviour is therefore **equivalent in method, not in runtime guarantees**, on C
 
 ## Install
 
-All packages install the same product artifacts (`idea.md`, `PRD.md`, …) at your project root; copy the
-package for your harness into your target repository.
+All packages install the same product artifacts (`idea.md`, `PRD.md`, …) at your project root. The
+easiest path — and the one that makes a project **transferable across harnesses** — is the installer:
+
+```bash
+python3 build/generate.py --install all        <YOUR-PROJECT>   # every harness, one framework version
+python3 build/generate.py --install claude-code <YOUR-PROJECT>  # or copilot | codex, a single harness
+```
+`--install` copies the chosen package(s) and seeds `.workteam/` (`Workteam-State.md`, `Decisions-Log.md`,
+`Project.md` stamped with the framework version). See [Project-Portability.md](Project-Portability.md).
+
+Or copy a package by hand:
 
 ### Claude Code
 ```bash
 cp -R dist/claude-code/.claude   <YOUR-PROJECT>/.claude
-cp    dist/claude-code/CLAUDE.md <YOUR-PROJECT>/CLAUDE.md
-cp    dist/claude-code/Constitution.md <YOUR-PROJECT>/Constitution.md
+cp    dist/claude-code/CLAUDE.md dist/claude-code/Constitution.md <YOUR-PROJECT>/
 ```
 Invoke the **coordinator** subagent with your goal; it dispatches the others via `Task`.
 
 ### GitHub Copilot (VS Code)
 ```bash
-cp -R dist/copilot/.github        <YOUR-PROJECT>/.github
-cp    dist/copilot/Constitution.md <YOUR-PROJECT>/Constitution.md
+cp -R dist/copilot/.github         <YOUR-PROJECT>/.github
+cp    dist/copilot/WORKTEAM.md dist/copilot/Constitution.md <YOUR-PROJECT>/
 ```
 Open in VS Code with Copilot agent mode; invoke the **Coordinator** agent.
 
 ### Codex
 ```bash
-cp    dist/codex/AGENTS.md         <YOUR-PROJECT>/AGENTS.md
-cp -R dist/codex/agents            <YOUR-PROJECT>/agents
-cp -R dist/codex/skills            <YOUR-PROJECT>/skills
-cp    dist/codex/Constitution.md   <YOUR-PROJECT>/Constitution.md
+cp    dist/codex/AGENTS.md dist/codex/Constitution.md <YOUR-PROJECT>/
+cp -R dist/codex/.codex                               <YOUR-PROJECT>/.codex
 ```
-Point Codex at the repo; it reads `AGENTS.md` and follows the pipeline, reading role/skill files on demand.
+Point Codex at the repo; it reads `AGENTS.md` and follows the pipeline, reading `.codex/agents` and
+`.codex/skills` on demand.
 
 ## Regenerating
 

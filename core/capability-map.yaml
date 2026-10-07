@@ -1,0 +1,62 @@
+# Capability Map — neutral capability → per-harness binding
+
+# This is the human-readable reference. `build/generate.py` implements the same mapping
+# (as a Python dict) to emit the per-platform packages under `dist/`. Keep the two in sync.
+
+neutral_capabilities:
+  READ:      Read files.
+  SEARCH:    Search the codebase (grep/semantic).
+  EDIT:      Create/modify files (scope is stated per agent, e.g. own artifact only).
+  SHELL:     Run commands in a terminal.
+  ASK_USER:  Ask the user a clarifying question and wait for the answer.
+  SUBAGENT:  Dispatch an isolated subtask that runs in its own context and returns a concise result.
+
+platforms:
+
+  claude-code:
+    agents_dir: .claude/agents          # one <slug>.md per agent (subagent)
+    agent_ext: .md
+    skills_dir: .claude/skills          # <name>/SKILL.md
+    entry: CLAUDE.md                     # project memory: intro + Coordinator + capability legend
+    frontmatter: [name, description, tools]
+    tools:
+      READ: Read
+      SEARCH: [Grep, Glob]
+      EDIT: [Edit, Write]
+      SHELL: Bash
+      ASK_USER: AskUserQuestion
+      SUBAGENT: Task
+    supports: { subagent: true, skills: true, ask_user: true }
+
+  copilot:
+    agents_dir: .github/agents          # one <slug>.agent.md per agent
+    agent_ext: .agent.md
+    skills_dir: .github/skills          # <name>/SKILL.md
+    frontmatter: [name, description, argument-hint, tools, target, user-invocable, disable-model-invocation]
+    tools:
+      READ: read
+      SEARCH: search
+      EDIT: edit
+      SHELL: terminal
+      ASK_USER: vscode/askQuestions
+      SUBAGENT: runSubagent
+    supports: { subagent: true, skills: true, ask_user: true }
+
+  codex:
+    entry: AGENTS.md                     # consolidated orchestration doc + role index + degradation legend
+    agents_dir: agents                   # role prompts the single agent reads on demand (<slug>.md)
+    skills_dir: skills                   # <name>/SKILL.md, read on demand
+    frontmatter: []                      # none; Codex has no agent/skill frontmatter system
+    tools:
+      READ: read
+      SEARCH: grep
+      EDIT: apply_patch
+      SHELL: shell
+      ASK_USER: "ask the user inline in chat and wait"
+      SUBAGENT: "run the subtask sequentially yourself (no subagents)"
+    supports: { subagent: false, skills: false, ask_user: false }
+    degradation:
+      SUBAGENT: "No real subagents. The Coordinator and the parallel review/QA perspectives run as
+                 sequential passes in the single agent; isolation is by discipline, not by runtime."
+      skills: "No skill system. Skills are plain files under skills/; read the referenced SKILL.md on demand."
+      ask_user: "No interactive question UI. Ask in chat and wait for the reply before proceeding."

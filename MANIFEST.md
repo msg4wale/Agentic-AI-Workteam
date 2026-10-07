@@ -1,83 +1,89 @@
 # Agentic AI Workteam Manifest
 
-- Agents: 10
-- Skills: 65
+Source of truth: `core/` (platform-neutral). Installable packages are generated into `dist/`
+by `build/generate.py` for Claude Code, GitHub Copilot, and Codex. Do not hand-edit `dist/`.
 
-## Agents
-- `.github/agents/code-reviewer.agent.md`
-- `.github/agents/coordinator.agent.md`
-- `.github/agents/devops-engineer.agent.md`
-- `.github/agents/engineering-lead.agent.md`
-- `.github/agents/idea-discovery.agent.md`
-- `.github/agents/plan-architect.agent.md`
-- `.github/agents/product-manager.agent.md`
-- `.github/agents/qa-engineer.agent.md`
-- `.github/agents/software-engineer.agent.md`
-- `.github/agents/solution-architect.agent.md`
+- Agents: 10   (core/agents/*.agent.md)
+- Skills: 65   (core/skills/<name>/SKILL.md)
+- Constitution: core/Constitution.md
+- Generator: build/generate.py   ·   Capability map: core/capability-map.yaml
+- Generated packages: dist/claude-code/ · dist/copilot/ · dist/codex/
 
-## Skills
-- `.github/skills/architecture-drivers-decisions/SKILL.md`
-- `.github/skills/build-release-packaging/SKILL.md`
-- `.github/skills/change-correctness-analysis/SKILL.md`
-- `.github/skills/code-design-quality-review/SKILL.md`
-- `.github/skills/code-quality-security-review/SKILL.md`
-- `.github/skills/codebase-reuse-analysis/SKILL.md`
-- `.github/skills/constitution-governance/SKILL.md`
-- `.github/skills/data-interface-integration-design/SKILL.md`
-- `.github/skills/dependency-sequencing-analysis/SKILL.md`
-- `.github/skills/deploy-execution-verification/SKILL.md`
-- `.github/skills/deployment-observability-delivery/SKILL.md`
-- `.github/skills/deployment-plan-design/SKILL.md`
-- `.github/skills/deployment-readiness-analysis/SKILL.md`
-- `.github/skills/deployment-reporting-handover/SKILL.md`
-- `.github/skills/engineering-issue-specification/SKILL.md`
-- `.github/skills/engineering-plan-output-contract/SKILL.md`
-- `.github/skills/engineering-plan-validation/SKILL.md`
-- `.github/skills/engineering-readiness-analysis/SKILL.md`
-- `.github/skills/environment-provisioning/SKILL.md`
-- `.github/skills/epic-user-story-design/SKILL.md`
-- `.github/skills/existing-system-discovery/SKILL.md`
-- `.github/skills/focused-implementation/SKILL.md`
-- `.github/skills/functional-acceptance-validation/SKILL.md`
-- `.github/skills/idea-validation/SKILL.md`
-- `.github/skills/implementation-handoff-contract/SKILL.md`
-- `.github/skills/implementation-handoff-validation/SKILL.md`
-- `.github/skills/infrastructure-as-code-authoring/SKILL.md`
-- `.github/skills/integration-data-failure-validation/SKILL.md`
-- `.github/skills/journey-requirements-discovery/SKILL.md`
-- `.github/skills/nonfunctional-quality-validation/SKILL.md`
-- `.github/skills/parallel-execution-orchestration/SKILL.md`
-- `.github/skills/plan-duplication-detection/SKILL.md`
-- `.github/skills/plan-validation-reporting/SKILL.md`
-- `.github/skills/prd-validation/SKILL.md`
-- `.github/skills/prioritization-release-planning/SKILL.md`
-- `.github/skills/problem-outcome-discovery/SKILL.md`
-- `.github/skills/product-framing-synthesis/SKILL.md`
-- `.github/skills/product-quality-metrics/SKILL.md`
-- `.github/skills/qa-decision-defect-reporting/SKILL.md`
-- `.github/skills/qa-readiness-context/SKILL.md`
-- `.github/skills/qa-report-contract/SKILL.md`
-- `.github/skills/qa-verification-planning/SKILL.md`
-- `.github/skills/quality-edge-case-discovery/SKILL.md`
-- `.github/skills/regression-evidence-validation/SKILL.md`
-- `.github/skills/repository-context-analysis/SKILL.md`
-- `.github/skills/requirement-architecture-compliance/SKILL.md`
-- `.github/skills/requirements-acceptance-criteria/SKILL.md`
-- `.github/skills/review-decision-validation/SKILL.md`
-- `.github/skills/review-readiness-context/SKILL.md`
-- `.github/skills/review-report-contract/SKILL.md`
-- `.github/skills/risk-based-test-design/SKILL.md`
-- `.github/skills/scope-risk-discovery/SKILL.md`
-- `.github/skills/security-data-integrity-review/SKILL.md`
-- `.github/skills/security-reliability-operations/SKILL.md`
-- `.github/skills/stakeholder-user-discovery/SKILL.md`
-- `.github/skills/subagent-parallel-execution/SKILL.md`
-- `.github/skills/system-component-design/SKILL.md`
-- `.github/skills/task-readiness-analysis/SKILL.md`
-- `.github/skills/tdd-output-contract/SKILL.md`
-- `.github/skills/tdd-validation/SKILL.md`
-- `.github/skills/technical-task-decomposition/SKILL.md`
-- `.github/skills/technology-stack-discovery/SKILL.md`
-- `.github/skills/test-verification-review/SKILL.md`
-- `.github/skills/testing-verification/SKILL.md`
-- `.github/skills/workteam-state-management/SKILL.md`
+## Agents (neutral source)
+- `core/agents/code-reviewer.agent.md`
+- `core/agents/coordinator.agent.md`
+- `core/agents/devops-engineer.agent.md`
+- `core/agents/engineering-lead.agent.md`
+- `core/agents/idea-discovery.agent.md`
+- `core/agents/plan-architect.agent.md`
+- `core/agents/product-manager.agent.md`
+- `core/agents/qa-engineer.agent.md`
+- `core/agents/software-engineer.agent.md`
+- `core/agents/solution-architect.agent.md`
+
+## Skills (neutral source)
+- `core/skills/architecture-drivers-decisions/SKILL.md`
+- `core/skills/build-release-packaging/SKILL.md`
+- `core/skills/change-correctness-analysis/SKILL.md`
+- `core/skills/code-design-quality-review/SKILL.md`
+- `core/skills/code-quality-security-review/SKILL.md`
+- `core/skills/codebase-reuse-analysis/SKILL.md`
+- `core/skills/constitution-governance/SKILL.md`
+- `core/skills/data-interface-integration-design/SKILL.md`
+- `core/skills/dependency-sequencing-analysis/SKILL.md`
+- `core/skills/deploy-execution-verification/SKILL.md`
+- `core/skills/deployment-observability-delivery/SKILL.md`
+- `core/skills/deployment-plan-design/SKILL.md`
+- `core/skills/deployment-readiness-analysis/SKILL.md`
+- `core/skills/deployment-reporting-handover/SKILL.md`
+- `core/skills/engineering-issue-specification/SKILL.md`
+- `core/skills/engineering-plan-output-contract/SKILL.md`
+- `core/skills/engineering-plan-validation/SKILL.md`
+- `core/skills/engineering-readiness-analysis/SKILL.md`
+- `core/skills/environment-provisioning/SKILL.md`
+- `core/skills/epic-user-story-design/SKILL.md`
+- `core/skills/existing-system-discovery/SKILL.md`
+- `core/skills/focused-implementation/SKILL.md`
+- `core/skills/functional-acceptance-validation/SKILL.md`
+- `core/skills/idea-validation/SKILL.md`
+- `core/skills/implementation-handoff-contract/SKILL.md`
+- `core/skills/implementation-handoff-validation/SKILL.md`
+- `core/skills/infrastructure-as-code-authoring/SKILL.md`
+- `core/skills/integration-data-failure-validation/SKILL.md`
+- `core/skills/journey-requirements-discovery/SKILL.md`
+- `core/skills/nonfunctional-quality-validation/SKILL.md`
+- `core/skills/parallel-execution-orchestration/SKILL.md`
+- `core/skills/plan-duplication-detection/SKILL.md`
+- `core/skills/plan-validation-reporting/SKILL.md`
+- `core/skills/prd-validation/SKILL.md`
+- `core/skills/prioritization-release-planning/SKILL.md`
+- `core/skills/problem-outcome-discovery/SKILL.md`
+- `core/skills/product-framing-synthesis/SKILL.md`
+- `core/skills/product-quality-metrics/SKILL.md`
+- `core/skills/qa-decision-defect-reporting/SKILL.md`
+- `core/skills/qa-readiness-context/SKILL.md`
+- `core/skills/qa-report-contract/SKILL.md`
+- `core/skills/qa-verification-planning/SKILL.md`
+- `core/skills/quality-edge-case-discovery/SKILL.md`
+- `core/skills/regression-evidence-validation/SKILL.md`
+- `core/skills/repository-context-analysis/SKILL.md`
+- `core/skills/requirement-architecture-compliance/SKILL.md`
+- `core/skills/requirements-acceptance-criteria/SKILL.md`
+- `core/skills/review-decision-validation/SKILL.md`
+- `core/skills/review-readiness-context/SKILL.md`
+- `core/skills/review-report-contract/SKILL.md`
+- `core/skills/risk-based-test-design/SKILL.md`
+- `core/skills/scope-risk-discovery/SKILL.md`
+- `core/skills/security-data-integrity-review/SKILL.md`
+- `core/skills/security-reliability-operations/SKILL.md`
+- `core/skills/stakeholder-user-discovery/SKILL.md`
+- `core/skills/subagent-parallel-execution/SKILL.md`
+- `core/skills/system-component-design/SKILL.md`
+- `core/skills/task-readiness-analysis/SKILL.md`
+- `core/skills/tdd-output-contract/SKILL.md`
+- `core/skills/tdd-validation/SKILL.md`
+- `core/skills/technical-task-decomposition/SKILL.md`
+- `core/skills/technology-stack-discovery/SKILL.md`
+- `core/skills/test-verification-review/SKILL.md`
+- `core/skills/testing-verification/SKILL.md`
+- `core/skills/workteam-state-management/SKILL.md`

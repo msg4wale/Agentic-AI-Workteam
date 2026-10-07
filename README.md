@@ -1,9 +1,17 @@
 # Agentic AI Workteam
 
-A reusable **agentic software-development workteam** for GitHub Copilot in VS Code. A **Coordinator**
-agent owns the overall task and delegates each stage of the software-development lifecycle to a
-specialised worker agent — from idea discovery through product definition, architecture, engineering
-planning, plan validation, implementation, code review, and QA.
+A reusable, **harness-agnostic** **agentic software-development workteam** — one neutral source compiled
+for **Claude Code, GitHub Copilot (VS Code), and Codex**. A **Coordinator** agent owns the overall task
+and delegates each stage of the software-development lifecycle to a specialised worker agent — from idea
+discovery through product definition, architecture, engineering planning, plan validation,
+implementation, code review, QA, and delivery.
+
+> **Agnostic by design.** Agents and skills are authored once in **`core/`** using neutral capability
+> tokens (`READ, SEARCH, EDIT, SHELL, ASK_USER, SUBAGENT`); `build/generate.py` compiles per-harness
+> packages into **`dist/`** (`claude-code/`, `copilot/`, `codex/`). Claude Code and Copilot get full
+> capabilities; Codex runs the same methodology with graceful degradation (no subagents/skills/question
+> UI → sequential passes, on-demand file reads, inline questions). See
+> [docs/Platform-Compatibility.md](docs/Platform-Compatibility.md).
 
 The design principle is simple: **the Coordinator orchestrates, each worker owns one SDLC
 responsibility, each skill encapsulates a repeatable capability, upstream decisions remain
@@ -12,12 +20,14 @@ serial.**
 
 ## What's new in this redesign
 
+- **Harness-agnostic** — authored once in `core/`, compiled to Claude Code, Copilot, and Codex packages
+  under `dist/` by `build/generate.py`. Neutral capability tokens bind to each harness's real tools.
 - **Coordinator agent** — a single accountable orchestrator that dispatches every worker as an
-  **isolated subagent** (`runSubagent`), keeping the main thread lean and each stage's context clean.
+  **isolated subagent** (`SUBAGENT`), keeping the main thread lean and each stage's context clean.
 - **Tailored tools per role** — each agent carries only the tools its job needs. Reviewer and QA are
   **read-only on production code**; the Software Engineer and Plan Architect hold edit capability.
-- **`#vscode/askQuestions` everywhere** — all agents use the interactive questions carousel for
-  clarifying decisions instead of guessing.
+- **Interactive clarification (`ASK_USER`) everywhere** — all agents ask the user for clarifying
+  decisions instead of guessing (carousel on Copilot, `AskUserQuestion` on Claude Code, inline on Codex).
 - **Plan Architect** — a new hard gate that validates the Engineering Plan against the actual codebase,
   surfaces reusable patterns/utilities/libraries, and flags steps that duplicate existing functionality.
 - **Parallel, unbiased Review and QA** — the Code Reviewer and QA Engineer run each perspective as an
@@ -456,74 +466,71 @@ QA                   TC-* / DEF-* + PASS / FAIL / BLOCKED (4 parallel perspectiv
 
 ```text
 Agentic-AI-Workteam/
-├── .github/
-│   ├── agents/
-│   │   ├── coordinator.agent.md
-│   │   ├── idea-discovery.agent.md
-│   │   ├── product-manager.agent.md
-│   │   ├── solution-architect.agent.md
-│   │   ├── engineering-lead.agent.md
-│   │   ├── plan-architect.agent.md
-│   │   ├── software-engineer.agent.md
-│   │   ├── code-reviewer.agent.md
-│   │   ├── qa-engineer.agent.md
-│   │   └── devops-engineer.agent.md
-│   └── skills/
-│       └── <reusable skill folders>/SKILL.md
-├── Constitution.md                # durable quality/spec/security principles (tailor per project)
-├── .workteam/                     # created at run time in the TARGET project (not shipped here)
-│   ├── Workteam-State.md          #   durable state ledger (stage/gate/task status)
-│   └── Decisions-Log.md           #   append-only on-the-fly decisions & clarifications
+├── core/                         # SINGLE SOURCE OF TRUTH (platform-neutral; author here)
+│   ├── agents/*.agent.md         #   neutral frontmatter + capability-abstract bodies
+│   ├── skills/<name>/SKILL.md
+│   ├── Constitution.md           #   durable quality/spec/security principles (tailor per project)
+│   └── capability-map.yaml       #   neutral capability -> per-harness binding (reference)
+├── build/generate.py            # compiles core/ -> dist/ for every harness (stdlib, idempotent)
+├── dist/                        # GENERATED packages (do not hand-edit) — copy the one you need
+│   ├── claude-code/   ->  .claude/agents, .claude/skills, CLAUDE.md, Constitution.md
+│   ├── copilot/       ->  .github/agents, .github/skills, Constitution.md
+│   └── codex/         ->  AGENTS.md, agents/, skills/, Constitution.md
 ├── docs/
-│   ├── Token-Optimization-Review.md   # prompt-surface size review & guidance
-│   └── SDD-Alignment-Review.md        # Specification-Driven Development alignment assessment
+│   ├── Platform-Compatibility.md     # capability matrix + Codex degradation + install
+│   ├── Token-Optimization-Review.md
+│   └── SDD-Alignment-Review.md
 ├── MANIFEST.md
 └── README.md
+
+# created at run time in the TARGET project (not shipped):
+#   .workteam/Workteam-State.md, .workteam/Decisions-Log.md   (durable state + decisions)
+#   idea.md, PRD.md, TDD.md, Engineering-Plan.md, Plan-Validation-Report.md,
+#   QA-Report.md, Deployment-Plan.md, Deployment-Report.md    (stage deliverables)
 ```
 
-`.github/` is the **single source of truth** and the installable workteam. Custom agents live under
-`.github/agents/`; reusable Agent Skills live under `.github/skills/<skill-name>/SKILL.md`.
+**`core/` is the only hand-authored tree.** Agents/skills use neutral capability tokens; the generator
+compiles them into each harness's conventions under **`dist/`** (committed so you can copy without running
+anything). After editing `core/`, run `python3 build/generate.py` to refresh `dist/`.
 `Constitution.md` is the standing quality/spec/security bar every agent honours (via the
-`constitution-governance` skill) — tailor it per project.
-`docs/` holds design reviews that inform future changes (token optimization, SDD alignment).
-The DevOps Engineer also produces `Deployment-Plan.md` / `Deployment-Report.md` at the target project root.
-
-`.workteam/` is the Coordinator's **durable memory**, created at run time in the project the workteam is
-operating on. It is committed by default so a project can version its workteam progress; delete it to
-start a task fresh. It holds no product deliverable — those (`idea.md`, `PRD.md`, …) live at the project
-root as before.
+`constitution-governance` skill).
+`.workteam/` is the Coordinator's **durable memory** created in the target project — committed by default
+so a project can version its workteam progress; delete it to start fresh.
 
 ---
 
 # Installation
 
-Clone this repository next to your target project, then copy the `.github` content into the target
-repository.
+Pick your harness and copy its package from `dist/` into your target project. Full matrix and
+degradation notes: [docs/Platform-Compatibility.md](docs/Platform-Compatibility.md).
 
-### macOS / Linux
-
+### Claude Code
 ```bash
-git clone https://github.com/msg4wale/Agentic-AI-Workteam.git
-cd <YOUR-TARGET-PROJECT>
-mkdir -p .github/agents .github/skills
-cp -R ../Agentic-AI-Workteam/.github/agents/* .github/agents/
-cp -R ../Agentic-AI-Workteam/.github/skills/* .github/skills/
+cp -R dist/claude-code/.claude   <YOUR-PROJECT>/.claude
+cp    dist/claude-code/CLAUDE.md dist/claude-code/Constitution.md <YOUR-PROJECT>/
 ```
+Invoke the **coordinator** subagent with your goal; it dispatches the others via the `Task` tool.
 
-### PowerShell
-
-```powershell
-git clone https://github.com/msg4wale/Agentic-AI-Workteam.git
-Set-Location <YOUR-TARGET-PROJECT>
-New-Item -ItemType Directory -Force .github\agents | Out-Null
-New-Item -ItemType Directory -Force .github\skills | Out-Null
-Copy-Item ..\Agentic-AI-Workteam\.github\agents\* .github\agents\ -Recurse -Force
-Copy-Item ..\Agentic-AI-Workteam\.github\skills\* .github\skills\ -Recurse -Force
+### GitHub Copilot (VS Code)
+```bash
+cp -R dist/copilot/.github         <YOUR-PROJECT>/.github
+cp    dist/copilot/Constitution.md <YOUR-PROJECT>/Constitution.md
 ```
+Open in VS Code with Copilot agent mode; invoke the **Coordinator** agent.
 
-Open the target project in a current version of **VS Code with GitHub Copilot agent capabilities
-enabled**. Invoke the **Coordinator** to run the whole lifecycle, or invoke any individual worker agent
-directly for a single stage.
+### Codex
+```bash
+cp dist/codex/AGENTS.md dist/codex/Constitution.md <YOUR-PROJECT>/
+cp -R dist/codex/agents dist/codex/skills          <YOUR-PROJECT>/
+```
+Point Codex at the repo; it reads `AGENTS.md` and runs the pipeline, reading role/skill files on demand
+(single agent, sequential passes — see the compatibility doc).
+
+### Customising
+Edit `core/` (never `dist/`), then regenerate:
+```bash
+python3 build/generate.py
+```
 
 ---
 
@@ -590,6 +597,8 @@ approved stage, overwrites an approved deliverable, or re-dispatches a completed
 
 This repository contains the Coordinator-orchestrated redesign:
 
+- **Harness-agnostic**: one neutral `core/` compiled to Claude Code, GitHub Copilot, and Codex packages
+  (`dist/`) by `build/generate.py`; Codex runs the same methodology with graceful degradation
 - Coordinator agent with isolated subagent delegation, per-stage checkpoint approvals, and a durable
   state ledger + decision log (`.workteam/`) for resumable, idempotent runs
 - Idea Discovery, Product Manager, Solution Architect, Engineering Lead (as before, now

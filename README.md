@@ -1,9 +1,17 @@
 # Agentic AI Workteam
 
-A reusable **agentic software-development workteam** for GitHub Copilot in VS Code. A **Coordinator**
-agent owns the overall task and delegates each stage of the software-development lifecycle to a
-specialised worker agent — from idea discovery through product definition, architecture, engineering
-planning, plan validation, implementation, code review, and QA.
+A reusable, **harness-agnostic** **agentic software-development workteam** — one neutral source compiled
+for **Claude Code, GitHub Copilot (VS Code), and Codex**. A **Coordinator** agent owns the overall task
+and delegates each stage of the software-development lifecycle to a specialised worker agent — from idea
+discovery through product definition, architecture, engineering planning, plan validation,
+implementation, code review, QA, and delivery.
+
+> **Agnostic by design.** Agents and skills are authored once in **`core/`** using neutral capability
+> tokens (`READ, SEARCH, EDIT, SHELL, ASK_USER, SUBAGENT`); `build/generate.py` compiles per-harness
+> packages into **`dist/`** (`claude-code/`, `copilot/`, `codex/`). Claude Code and Copilot get full
+> capabilities; Codex runs the same methodology with graceful degradation (no subagents/skills/question
+> UI → sequential passes, on-demand file reads, inline questions). See
+> [docs/Platform-Compatibility.md](docs/Platform-Compatibility.md).
 
 The design principle is simple: **the Coordinator orchestrates, each worker owns one SDLC
 responsibility, each skill encapsulates a repeatable capability, upstream decisions remain
@@ -12,12 +20,14 @@ serial.**
 
 ## What's new in this redesign
 
+- **Harness-agnostic** — authored once in `core/`, compiled to Claude Code, Copilot, and Codex packages
+  under `dist/` by `build/generate.py`. Neutral capability tokens bind to each harness's real tools.
 - **Coordinator agent** — a single accountable orchestrator that dispatches every worker as an
-  **isolated subagent** (`runSubagent`), keeping the main thread lean and each stage's context clean.
+  **isolated subagent** (`SUBAGENT`), keeping the main thread lean and each stage's context clean.
 - **Tailored tools per role** — each agent carries only the tools its job needs. Reviewer and QA are
   **read-only on production code**; the Software Engineer and Plan Architect hold edit capability.
-- **`#vscode/askQuestions` everywhere** — all agents use the interactive questions carousel for
-  clarifying decisions instead of guessing.
+- **Interactive clarification (`ASK_USER`) everywhere** — all agents ask the user for clarifying
+  decisions instead of guessing (carousel on Copilot, `AskUserQuestion` on Claude Code, inline on Codex).
 - **Plan Architect** — a new hard gate that validates the Engineering Plan against the actual codebase,
   surfaces reusable patterns/utilities/libraries, and flags steps that duplicate existing functionality.
 - **Parallel, unbiased Review and QA** — the Code Reviewer and QA Engineer run each perspective as an
@@ -28,6 +38,14 @@ serial.**
   gate, and task status) and `.workteam/Decisions-Log.md` (every on-the-fly clarification). After any
   disruption it **resumes exactly where it stopped** — never re-running an approved stage, overwriting
   an approved deliverable, or duplicating a completed task.
+- **DevOps Engineer** — after QA certifies a build, builds/releases it and provisions the **local** or
+  **production** environment via **Infrastructure as Code**, deploys behind approval checkpoints, and
+  hands over access. The Solution Architect recommends and gets approval for **both** a local dev/test
+  stack (open-source + IaC) and a production stack.
+- **Constitution** — a shipped, tailorable `Constitution.md` states the durable quality/spec/security
+  principles the whole team is held to; agents load it on demand.
+- **Leaner agent prompts** — the large deliverable templates now live in on-demand `*-output-contract`
+  skills, keeping each agent's always-loaded prompt focused on its rules and gates.
 
 ## How progression works
 
@@ -56,6 +74,7 @@ resume later: the Coordinator reads the ledger first and continues from the firs
 | 6 | Software Engineer | Implementation | One approved task | Repository change + PR-ready handoff |
 | 7 | Code Reviewer | Independent review (parallel perspectives) | Task + diff/change set | Approve / changes required / blocked |
 | 8 | QA Engineer | Independent QA (parallel perspectives) | Implemented capability | `QA-Report.md` + QA evidence |
+| 9 | DevOps Engineer | Build, release, deploy; provision local/prod infra (IaC) | QA-certified build + approved stacks | Deployed app + `Deployment-Report.md` |
 
 ## Per-Role Tool Tailoring
 
@@ -72,6 +91,7 @@ Each agent is granted only the tools its responsibility requires.
 | Software Engineer | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
 | Code Reviewer | ✓ | ✓ | ✓† | ✓ | ✓ | ✓ |
 | QA Engineer | ✓ | ✓ | ✓‡ | ✓ | ✓ | ✓ |
+| DevOps Engineer | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
 
 \* Plan Architect `edit` is scoped to `Plan-Validation-Report.md` only.
 † Code Reviewer `edit` is scoped to its own review report artifact only — **never production code**.
@@ -129,10 +149,17 @@ Coordinator  (reads .workteam/ state first & resumes; clarifies goal via #vscode
                           |                                   |
                           |                        +----------+----------+
                           |                        |                     |
-                          +--- QA FAIL          QA FAIL               QA PASS
+                          +--- QA FAIL          QA FAIL               QA PASS [CHK]
                                                                         |
                                                                         v
-                                                            Release / Merge Gate [CHK]
+                                              9. DevOps Engineer  (implements approved TDD stacks via IaC)
+                                                 - target? Local | Production
+                                                 - new/changed infra -> Deployment-Plan.md [CHK]
+                                                 - env ready -> proceed-to-deploy [CHK]
+                                                 - build + deploy + verify
+                                                                        |
+                                                                        v
+                                              Deployment-Report.md  (access + secure credentials)
 
 Every stage transition updates .workteam/Workteam-State.md (stage/gate/task status) and
 .workteam/Decisions-Log.md (clarifications). On restart the Coordinator reads these and resumes at the
@@ -177,9 +204,11 @@ deliverable.
 ## 1. Idea Discovery Agent
 
 **Purpose:** Interview, groom, challenge, and clarify the problem owner until the product idea is
-sufficiently defined for Product Management without hidden assumptions.
+sufficiently defined for Product Management without hidden assumptions. Handles both **greenfield** (new
+product) and **brownfield** ideas — adding, modifying, updating, or refactoring an existing app — and
+determines which up front.
 
-**Input:** Problem owner / innovator → **Output:** `idea.md`
+**Input:** Problem owner / innovator (+ existing codebase for brownfield) → **Output:** `idea.md`
 
 **Agent:** `.github/agents/idea-discovery.agent.md`
 
@@ -187,6 +216,7 @@ sufficiently defined for Product Management without hidden assumptions.
 
 | Skill | Responsibility |
 |---|---|
+| `existing-system-discovery` | **Brownfield only.** Read-only, product-level scan of the existing app — current features, journeys, rules, integration points, change surface, and (for a refactor) behaviour to preserve — feeding `idea.md`'s Existing System Context. |
 | `problem-outcome-discovery` | Clarifies the problem, desired outcome, evidence, value, and success definition. |
 | `stakeholder-user-discovery` | Identifies users, stakeholders, actors, needs, permissions, and affected parties. |
 | `journey-requirements-discovery` | Discovers journeys, functional requirements, business rules, states, and interactions. |
@@ -376,6 +406,38 @@ only after all return. `FAIL` routes back to the Software Engineer (re-review if
 
 ---
 
+## 9. DevOps Engineer Agent
+
+**Purpose:** Deliver the QA-certified application into a running environment. Build, release, and publish
+the software, and provision the **local** or **production** environment and infrastructure it needs using
+**Infrastructure as Code** — activated only after QA PASS + approval, implementing the **approved** stacks
+from `TDD.md`. **Read-only on production/source code** (it never edits the app); it authors IaC and runs
+provisioning/deploys behind approval checkpoints.
+
+**Input:** QA-certified build + approved Local/Production stacks (`TDD.md`) + infra state →
+**Output:** provisioned infra (IaC), deployed & verified app, `Deployment-Plan.md`, `Deployment-Report.md`
+
+**Agent:** `.github/agents/devops-engineer.agent.md`
+
+### Skills
+
+| Skill | Responsibility |
+|---|---|
+| `deployment-readiness-analysis` | Confirm QA certification, the certified build, and the approved target stack; select target. |
+| `infrastructure-as-code-authoring` | Author/update reproducible IaC (Compose/Terraform/Pulumi/Ansible/K8s/Helm) for the approved stack. |
+| `environment-provisioning` | Detect env/infra state (exists/healthy/needs-change) and provision or verify it idempotently. |
+| `deployment-plan-design` | Break new setup/modification into a granular `Deployment-Plan.md` with order, risks, rollback. |
+| `build-release-packaging` | Build, version, package, and publish the certified release artifact/image. |
+| `deploy-execution-verification` | Execute the deploy, run smoke/health checks, and roll back safely on failure. |
+| `deployment-reporting-handover` | Produce `Deployment-Report.md` with access details and secure credential referencing. |
+
+Flow: confirm target (Local/Production) → assess env → if new/changed, an approved `Deployment-Plan.md` →
+confirm ready → proceed-to-deploy approval → build & deploy & verify → `Deployment-Report.md`. Local
+platforms must be open-source and IaC-deployable; **secrets are never committed** — the report references
+a secure store. Re-runnable per target.
+
+---
+
 # Traceability Model
 
 The workteam preserves traceability across the lifecycle:
@@ -404,65 +466,89 @@ QA                   TC-* / DEF-* + PASS / FAIL / BLOCKED (4 parallel perspectiv
 
 ```text
 Agentic-AI-Workteam/
-├── .github/
-│   ├── agents/
-│   │   ├── coordinator.agent.md
-│   │   ├── idea-discovery.agent.md
-│   │   ├── product-manager.agent.md
-│   │   ├── solution-architect.agent.md
-│   │   ├── engineering-lead.agent.md
-│   │   ├── plan-architect.agent.md
-│   │   ├── software-engineer.agent.md
-│   │   ├── code-reviewer.agent.md
-│   │   └── qa-engineer.agent.md
-│   └── skills/
-│       └── <reusable skill folders>/SKILL.md
-├── .workteam/                     # created at run time in the TARGET project (not shipped here)
-│   ├── Workteam-State.md          #   durable state ledger (stage/gate/task status)
-│   └── Decisions-Log.md           #   append-only on-the-fly decisions & clarifications
+├── core/                         # SINGLE SOURCE OF TRUTH (platform-neutral; author here)
+│   ├── agents/*.agent.md         #   neutral frontmatter + capability-abstract bodies
+│   ├── skills/<name>/SKILL.md
+│   ├── Constitution.md           #   durable quality/spec/security principles (tailor per project)
+│   └── capability-map.yaml       #   neutral capability -> per-harness binding (reference)
+├── VERSION                      # framework version, stamped into every generated package
+├── build/generate.py            # compiles core/ -> dist/; also `--install <harness|all> <dir>`
+├── dist/                        # GENERATED packages (do not hand-edit) — install the one(s) you need
+│   ├── claude-code/   ->  .claude/agents, .claude/skills, CLAUDE.md, Constitution.md
+│   ├── copilot/       ->  .github/agents, .github/skills, WORKTEAM.md, Constitution.md
+│   └── codex/         ->  AGENTS.md, .codex/agents, .codex/skills, Constitution.md
+├── docs/
+│   ├── Platform-Compatibility.md     # capability matrix + Codex degradation + install
+│   ├── Project-Portability.md        # resume a project across harnesses
+│   ├── Token-Optimization-Review.md
+│   └── SDD-Alignment-Review.md
 ├── MANIFEST.md
 └── README.md
+
+# created at run time in the TARGET project (harness-neutral, committed → transferable):
+#   .workteam/Workteam-State.md, .workteam/Decisions-Log.md   (durable state + decisions)
+#   .workteam/Project.md                                      (portable manifest: version, harnesses,
+#                                                              last-active-harness, transfer log)
+#   idea.md, PRD.md, TDD.md, Engineering-Plan.md, Plan-Validation-Report.md,
+#   QA-Report.md, Deployment-Plan.md, Deployment-Report.md    (stage deliverables)
 ```
 
-`.github/` is the **single source of truth** and the installable workteam. Custom agents live under
-`.github/agents/`; reusable Agent Skills live under `.github/skills/<skill-name>/SKILL.md`.
-
-`.workteam/` is the Coordinator's **durable memory**, created at run time in the project the workteam is
-operating on. It is committed by default so a project can version its workteam progress; delete it to
-start a task fresh. It holds no product deliverable — those (`idea.md`, `PRD.md`, …) live at the project
-root as before.
+**`core/` is the only hand-authored tree.** Agents/skills use neutral capability tokens; the generator
+compiles them into each harness's conventions under **`dist/`** (committed so you can copy without running
+anything). After editing `core/`, run `python3 build/generate.py` to refresh `dist/`.
+`Constitution.md` is the standing quality/spec/security bar every agent honours (via the
+`constitution-governance` skill).
+`.workteam/` is the Coordinator's **durable memory** created in the target project — committed by default
+so a project can version its workteam progress; delete it to start fresh.
 
 ---
 
 # Installation
 
-Clone this repository next to your target project, then copy the `.github` content into the target
-repository.
-
-### macOS / Linux
-
+**Easiest — the installer** (also sets the project up to be transferable across harnesses):
 ```bash
-git clone https://github.com/msg4wale/Agentic-AI-Workteam.git
-cd <YOUR-TARGET-PROJECT>
-mkdir -p .github/agents .github/skills
-cp -R ../Agentic-AI-Workteam/.github/agents/* .github/agents/
-cp -R ../Agentic-AI-Workteam/.github/skills/* .github/skills/
+python3 build/generate.py --install all        <YOUR-PROJECT>   # all harnesses, one framework version
+python3 build/generate.py --install claude-code <YOUR-PROJECT>  # or copilot | codex
 ```
+It copies the package(s) and seeds `.workteam/` (`Workteam-State.md`, `Decisions-Log.md`, and a stamped
+`Project.md`). Full matrix + degradation: [docs/Platform-Compatibility.md](docs/Platform-Compatibility.md).
 
-### PowerShell
+Or copy a package by hand:
 
-```powershell
-git clone https://github.com/msg4wale/Agentic-AI-Workteam.git
-Set-Location <YOUR-TARGET-PROJECT>
-New-Item -ItemType Directory -Force .github\agents | Out-Null
-New-Item -ItemType Directory -Force .github\skills | Out-Null
-Copy-Item ..\Agentic-AI-Workteam\.github\agents\* .github\agents\ -Recurse -Force
-Copy-Item ..\Agentic-AI-Workteam\.github\skills\* .github\skills\ -Recurse -Force
+### Claude Code
+```bash
+cp -R dist/claude-code/.claude   <YOUR-PROJECT>/.claude
+cp    dist/claude-code/CLAUDE.md dist/claude-code/Constitution.md <YOUR-PROJECT>/
 ```
+Invoke the **coordinator** subagent with your goal; it dispatches the others via the `Task` tool.
 
-Open the target project in a current version of **VS Code with GitHub Copilot agent capabilities
-enabled**. Invoke the **Coordinator** to run the whole lifecycle, or invoke any individual worker agent
-directly for a single stage.
+### GitHub Copilot (VS Code)
+```bash
+cp -R dist/copilot/.github         <YOUR-PROJECT>/.github
+cp    dist/copilot/WORKTEAM.md dist/copilot/Constitution.md <YOUR-PROJECT>/
+```
+Open in VS Code with Copilot agent mode; invoke the **Coordinator** agent.
+
+### Codex
+```bash
+cp dist/codex/AGENTS.md dist/codex/Constitution.md <YOUR-PROJECT>/
+cp -R dist/codex/.codex                            <YOUR-PROJECT>/.codex
+```
+Point Codex at the repo; it reads `AGENTS.md` and runs the pipeline, reading `.codex/agents` and
+`.codex/skills` on demand (single agent, sequential passes — see the compatibility doc).
+
+### Transferable projects (start on one harness, resume on another)
+Install **all** harnesses (`--install all`) so the project opens in any of them. Project state is
+harness-neutral and git-portable (deliverables at root + `.workteam/`), so to switch: **flush** (make
+`.workteam/` true, set Last Active Harness in `Project.md`) and **commit**; then on the other harness the
+Coordinator reads `Project.md` first and resumes at the first unapproved stage — no re-running or
+duplication. Only committed state transfers. Guide: [docs/Project-Portability.md](docs/Project-Portability.md).
+
+### Customising
+Edit `core/` (never `dist/`), then regenerate:
+```bash
+python3 build/generate.py
+```
 
 ---
 
@@ -483,7 +569,14 @@ directly for a single stage.
    loops back to Software Engineering.
 6. **QA Engineer** runs its four perspectives in parallel and returns a verdict; `FAIL` loops back to
    Software Engineering (re-review if code changes).
-7. Release/merge only when review and QA gates pass **and** you approve at the checkpoint.
+7. On **QA PASS + your approval**, the **DevOps Engineer** is activated: it confirms the target (Local or
+   Production), provisions/verifies the environment via IaC (an approved `Deployment-Plan.md` first if new
+   setup/changes are needed), builds and deploys the certified build behind a proceed-to-deploy approval,
+   verifies it, and delivers `Deployment-Report.md` with access details and secure credential referencing.
+   Re-run it per target. Release/merge only when review and QA pass **and** you approve at the checkpoint.
+
+Throughout, every agent honours `Constitution.md` — the standing quality/spec/security bar (tailor it per
+project).
 
 **Resuming after a disruption:** just invoke the Coordinator again. It reads `.workteam/Workteam-State.md`
 and `.workteam/Decisions-Log.md`, continues from the first unapproved stage, and never re-runs an
@@ -508,9 +601,13 @@ approved stage, overwrites an approved deliverable, or re-dispatches a completed
   never on a technically-met gate alone.
 - **Durable, resumable state.** Stage/task status and every decision live in `.workteam/`, so a disrupted
   run resumes exactly where it stopped — idempotent, no re-running or duplication.
+- **Governed by a constitution.** `Constitution.md` states the durable quality/spec/security bar every
+  agent honours; the stricter of a stage rule and the constitution wins.
+- **Reproducible, IaC-provisioned delivery.** Environments are Infrastructure as Code (open-source local),
+  secrets are never committed, and infrastructure changes are idempotent.
 - **Source-of-truth hierarchy.** Downstream agents do not rewrite upstream intent.
 - **Parallelize independent work; serialize dependent decisions.**
-- **Evidence over claims.** Tests, review findings, and QA verdicts trace to actual evidence.
+- **Evidence over claims.** Tests, review findings, QA verdicts, and deployment results trace to actual evidence.
 
 ---
 
@@ -518,6 +615,8 @@ approved stage, overwrites an approved deliverable, or re-dispatches a completed
 
 This repository contains the Coordinator-orchestrated redesign:
 
+- **Harness-agnostic**: one neutral `core/` compiled to Claude Code, GitHub Copilot, and Codex packages
+  (`dist/`) by `build/generate.py`; Codex runs the same methodology with graceful degradation
 - Coordinator agent with isolated subagent delegation, per-stage checkpoint approvals, and a durable
   state ledger + decision log (`.workteam/`) for resumable, idempotent runs
 - Idea Discovery, Product Manager, Solution Architect, Engineering Lead (as before, now
@@ -526,3 +625,7 @@ This repository contains the Coordinator-orchestrated redesign:
 - Software Engineer with controlled `runSubagent` parallel execution and reuse-target adherence
 - Code Reviewer with five parallel, blind review perspectives (read-only on production code)
 - QA Engineer with four parallel, blind validation perspectives (read-only on production code)
+- DevOps Engineer with IaC provisioning and gated build/deploy of the QA-certified build to Local or
+  Production, plus dual-stack (local + production) recommendation and approval in the Solution Architect
+- Shipped, tailorable `Constitution.md` governing quality/spec/security across the team
+- Leaner agent prompts: large deliverable templates moved into on-demand `*-output-contract` skills
